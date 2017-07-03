@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="activity_horizontal_margin">16dp</dimen>
+    <dimen name="activity_vertical_margin">16dp</dimen>
+
+    <dimen name="margin_big">36dp</dimen>
+    <dimen name="margin_small">16dp</dimen>
+    <dimen name="lists_title_bottom_margin">12dp</dimen>
+
+    <dimen name="logo_image_size">100dp</dimen>
+    <dimen name="lv_header_text_size">10sp</dimen>
+    <dimen name="input_field_height">48dp</dimen>
+
+    <dimen name="edit_text_padding">14dp</dimen>
+    <dimen name="login_buttons_text_size">16sp</dimen>
+
+    <dimen name="padding_medium">16dp</dimen>
+    <dimen name="padding_small">8dp</dimen>
+
+    <dimen name="image_size_profile_settings_screen">64dp</dimen>
+</resources>
