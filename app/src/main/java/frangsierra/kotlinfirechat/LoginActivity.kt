@@ -9,12 +9,14 @@ import frangsierra.kotlinfirechat.util.onError
 import gg.grizzlygrit.common.log.Grove
 import kotlinx.android.synthetic.main.login_activity.*
 import org.jetbrains.anko.doAsync
+import org.jetbrains.anko.indeterminateProgressDialog
 import org.jetbrains.anko.toast
 import kotlin.properties.Delegates
 
 class LoginActivity : AppCompatActivity() {
     val auth = FirebaseAuth.getInstance()
     val authenticationListener: FirebaseAuth.AuthStateListener = FirebaseAuth.AuthStateListener { auth -> loggedUser = auth.currentUser }
+    val indeterminateProgressDialog by lazy { indeterminateProgressDialog("Login in") }
 
     var loggedUser: FirebaseUser? by Delegates.observable(null as FirebaseUser?) { _, old, new ->
         //Every time the logged user value change we check it to move to the new activity
@@ -28,9 +30,11 @@ class LoginActivity : AppCompatActivity() {
 
         loginPasswordButton.setOnClickListener {
             if (!fieldsAreFilled()) return@setOnClickListener
+            indeterminateProgressDialog.show()
             doAsync {
                 auth.signInWithEmailAndPassword(editTextEmail.text.toString(), editTextPassword.text.toString())
                         .addOnCompleteListener { authResult ->
+                            indeterminateProgressDialog.hide()
                             authResult.exception?.let {
                                 toast(it.message.toString())
                                 return@addOnCompleteListener

@@ -17,8 +17,10 @@ class ProfileActivity : AppCompatActivity() {
 
         override fun onDataChange(snapshot: DataSnapshot) {
             val currentUserValues = snapshot.getValue(User::class.java)
-            userNameEditText.setText(currentUserValues.userName)
-            secondNameEditText.setText(currentUserValues.secondName)
+            currentUserValues?.let {
+                userNameEditText.setText(it.userName)
+                secondNameEditText.setText(it.secondName)
+            }
         }
 
     }

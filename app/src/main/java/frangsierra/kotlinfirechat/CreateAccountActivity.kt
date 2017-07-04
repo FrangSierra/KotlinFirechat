@@ -11,21 +11,25 @@ import gg.grizzlygrit.common.log.Grove
 import kotlinx.android.synthetic.main.create_account_activity.*
 import org.jetbrains.anko.custom.onUiThread
 import org.jetbrains.anko.doAsync
+import org.jetbrains.anko.indeterminateProgressDialog
 import org.jetbrains.anko.toast
 
 
 class CreateAccountActivity : AppCompatActivity() {
     val auth = FirebaseAuth.getInstance()
+    val indeterminateProgressDialog by lazy {  indeterminateProgressDialog("Creating account") }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.create_account_activity)
 
         createAccountButton.setOnClickListener {
             if (!fieldsAreFilled()) return@setOnClickListener
+            indeterminateProgressDialog.show()
             doAsync {
-                auth.createUserWithEmailAndPassword(editTextEmail.text.toString(), editTextPassword.toString())
+                auth.createUserWithEmailAndPassword(editTextEmail.text.toString(), editTextPassword.text.toString())
                         .addOnCompleteListener { authResult ->
                             authResult.exception?.let {
+                                indeterminateProgressDialog.hide()
                                 toast(it.message.toString())
                                 return@addOnCompleteListener
                             }
@@ -68,7 +72,9 @@ class CreateAccountActivity : AppCompatActivity() {
             createdUser.updateProfile(newProfileRequest.build())
                     .addOnCompleteListener {
                         Grove.i{"New user $createdUser correctly updated with new username"}
-                        onUiThread { startActivity(Intent(this, LoginActivity::class.java).apply { flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK }) }
+                        onUiThread {
+                            indeterminateProgressDialog.hide()
+                            startActivity(Intent(this, LoginActivity::class.java).apply { flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK }) }
                     }
         }
     }
