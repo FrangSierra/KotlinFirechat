@@ -51,6 +51,14 @@ class MessageAdapter : RecyclerView.Adapter<MessageAdapter.MessageViewHolder>() 
         val messageTextView = v.findViewById(R.id.messageTextView) as TextView
         val authorTextView = v.findViewById(R.id.nameTextView) as TextView
     }
+
+    fun deleteMessage(key: String) {
+        val newMessages = emptyList<Pair<String,Message>>().plus(messageList).filter { it.first != key }
+        val diffResult = DiffUtil.calculateDiff(MessageDiff(this.messageList, newMessages))
+        messageList.clear()
+        messageList.addAll(newMessages)
+        diffResult.dispatchUpdatesTo(this)
+    }
 }
 
  class MessageDiff(val oldList: List<Pair<String, Message>>, val newList: List<Pair<String, Message>>) : DiffUtil.Callback() {

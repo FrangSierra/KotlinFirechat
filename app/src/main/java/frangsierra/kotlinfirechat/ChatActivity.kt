@@ -87,7 +87,9 @@ class ChatActivity : AppCompatActivity() {
             adapter.addMessage(snapshot.key, newMessage)
         }
 
-        override fun onChildRemoved(snapshot: DataSnapshot) {}
+        override fun onChildRemoved(snapshot: DataSnapshot) {
+            adapter.deleteMessage(snapshot.key)
+        }
 
     }
 }
