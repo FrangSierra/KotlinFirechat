@@ -77,11 +77,14 @@ class ChatActivity : AppCompatActivity() {
 
         override fun onChildMoved(snapshot: DataSnapshot, p1: String?) {}
 
-        override fun onChildChanged(snapshot: DataSnapshot, p1: String?) {}
+        override fun onChildChanged(snapshot: DataSnapshot, p1: String?) {
+            val updatedMessage = snapshot.getValue(Message::class.java)
+            adapter.updateMessage(snapshot.key, updatedMessage)
+        }
 
         override fun onChildAdded(snapshot: DataSnapshot, p1: String?) {
             val newMessage = snapshot.getValue(Message::class.java)
-            adapter.addMessage(newMessage)
+            adapter.addMessage(snapshot.key, newMessage)
         }
 
         override fun onChildRemoved(snapshot: DataSnapshot) {}
