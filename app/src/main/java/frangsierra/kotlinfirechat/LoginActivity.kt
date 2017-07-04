@@ -3,8 +3,15 @@ package frangsierra.kotlinfirechat
 import android.content.Intent
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
+import android.widget.Toast
+import com.google.android.gms.auth.api.Auth
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions
+import com.google.android.gms.common.ConnectionResult
+import com.google.android.gms.common.api.GoogleApiClient
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
+import com.google.firebase.auth.GoogleAuthProvider
 import frangsierra.kotlinfirechat.util.onError
 import gg.grizzlygrit.common.log.Grove
 import kotlinx.android.synthetic.main.login_activity.*
@@ -13,15 +20,40 @@ import org.jetbrains.anko.indeterminateProgressDialog
 import org.jetbrains.anko.toast
 import kotlin.properties.Delegates
 
-class LoginActivity : AppCompatActivity() {
+
+
+
+private const val RC_SIGN_IN = 123
+
+class LoginActivity : AppCompatActivity(), GoogleApiClient.OnConnectionFailedListener {
+    override fun onConnectionFailed(p0: ConnectionResult) {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
     val auth = FirebaseAuth.getInstance()
     val authenticationListener: FirebaseAuth.AuthStateListener = FirebaseAuth.AuthStateListener { auth -> loggedUser = auth.currentUser }
     val indeterminateProgressDialog by lazy { indeterminateProgressDialog("Login in") }
 
+    //TODO move this to other place
+    val gso by lazy {
+        GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                //Token is retrieved automatically from google.services
+                .requestIdToken(getString(R.string.default_web_client_id))
+                .requestEmail()
+                .build()
+    }
+
+    val googleApiClient: GoogleApiClient by lazy {
+        GoogleApiClient.Builder(this)
+                .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
+                .build()
+    }
+
     var loggedUser: FirebaseUser? by Delegates.observable(null as FirebaseUser?) { _, old, new ->
         //Every time the logged user value change we check it to move to the new activity
         if (old == null && new != null)
-            startActivity(Intent(this, ChatActivity::class.java).apply { flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK })
+            startActivity(Intent(this, ChatActivity::class.java)
+                    .apply { flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK })
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -43,7 +75,10 @@ class LoginActivity : AppCompatActivity() {
                         }.addOnFailureListener { error -> toast(error.message.toString()) }
             }
         }
-        loginGoogleButton.setOnClickListener { }
+        loginGoogleButton.setOnClickListener {
+            val signInIntent = Auth.GoogleSignInApi.getSignInIntent(googleApiClient)
+            startActivityForResult(signInIntent, RC_SIGN_IN)
+        }
 
         createAccountText.setOnClickListener {
             startActivity(Intent(this, CreateAccountActivity::class.java))
@@ -73,5 +108,33 @@ class LoginActivity : AppCompatActivity() {
     override fun onStop() {
         super.onStop()
         auth.removeAuthStateListener(authenticationListener)
+    }
+
+    //How to retrieve SHA1 for Firebase Google Sign In https://stackoverflow.com/questions/15727912/sha-1-fingerprint-of-keystore-certificate
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode === RC_SIGN_IN) {
+            val result = Auth.GoogleSignInApi.getSignInResultFromIntent(data)
+            if (result.isSuccess) {
+                // Google Sign In was successful, authenticate with Firebase
+                val account = result.signInAccount
+                firebaseAuthWithGoogle(account!!)
+            } else {
+                // Google Sign In failed, update UI appropriately
+                // ...
+            }
+        }
+    }
+
+    private fun firebaseAuthWithGoogle(account: GoogleSignInAccount) {
+        val credential = GoogleAuthProvider.getCredential(account.idToken, null)
+        auth.signInWithCredential(credential)
+                .addOnCompleteListener(this, { task ->
+                    if (!task.isSuccessful) {
+                        Toast.makeText(this, "Authentication failed.",
+                                Toast.LENGTH_SHORT).show()
+                    }
+                    //No need to manage successful state, auth state listener will be notified
+                })
     }
 }

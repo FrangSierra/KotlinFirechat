@@ -53,6 +53,9 @@ dependencies {
     compile "com.google.firebase:firebase-database:$firebase_version"
     compile "com.google.firebase:firebase-crash:$firebase_version"
 
+    //Google sign in
+    compile "com.google.android.gms:play-services-auth:$firebase_version"
+
     compile fileTree(dir: 'libs', include: ['*.jar'])
     androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
         exclude group: 'com.android.support', module: 'support-annotations'
