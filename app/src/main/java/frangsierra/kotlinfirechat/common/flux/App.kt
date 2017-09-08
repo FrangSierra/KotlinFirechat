@@ -20,7 +20,11 @@ class App :
     ComponentManager by DefaultComponentManager() {
 
     val exceptionHandlers: MutableList<Thread.UncaughtExceptionHandler> = ArrayList()
-
+    val component: AppComponent by lazy {
+        DaggerAppComponent.builder()
+            .appModule(AppModule(app))
+            .build()
+    }
     override fun onCreate() {
         super.onCreate()
         _app = this

@@ -2,12 +2,13 @@ package frangsierra.kotlinfirechat.session
 
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
-import dagger.Binds
 import dagger.Module
+import dagger.Provides
 import dagger.multibindings.ClassKey
 import dagger.multibindings.IntoMap
 import durdinapps.rxfirebase2.RxFirebaseAuth
 import frangsierra.kotlinfirechat.common.dagger.AppScope
+import frangsierra.kotlinfirechat.common.firebase.FirebaseMockModels
 import frangsierra.kotlinfirechat.common.flux.Dispatcher
 import frangsierra.kotlinfirechat.common.flux.Store
 import gg.grizzlygrit.authentication.SessionController
@@ -23,7 +24,8 @@ class SessionStore @Inject constructor(val dispatcher: Dispatcher,
                                        val controller: SessionController) : Store<SessionState>() {
     override fun init() {
 
-        RxFirebaseAuth.observeAuthState(authInstance)
+        if (!FirebaseMockModels.USE_FIREBASE_MOCK) {
+            RxFirebaseAuth.observeAuthState(authInstance)
                 .subscribeOn(Schedulers.io())
                 .observeOn(Schedulers.io())
                 .debounce(300, TimeUnit.MILLISECONDS)
@@ -31,9 +33,9 @@ class SessionStore @Inject constructor(val dispatcher: Dispatcher,
                     val loginStatus = if (firebaseAuth.currentUser != null) LoginStatus.LOGGED else LoginStatus.UNLOGGED
                     dispatcher.dispatchOnUi(AuthenticationStatusChangedAction(loginStatus, firebaseAuth.currentUser))
                 }, { throwable -> dispatcher.dispatchOnUi(AuthenticationErrorAction(throwable)) }).track()
-
+        }
         dispatcher.subscribe(AuthenticationStatusChangedAction::class).flowable().filter { it.loginStatus != state.status }
-                .subscribe { state = controller.onSessionStatusChange(state, it.loginStatus, it.loggedUser) }.track()
+            .subscribe { state = controller.onSessionStatusChange(state, it.loginStatus, it.loggedUser) }.track()
 
         dispatcher.subscribe(AuthenticationErrorAction::class) { state = controller.onAuthenticationError(state, it.throwable) }
 
@@ -63,12 +65,19 @@ data class SessionState(val status: LoginStatus = LoginStatus.LOGGING,
                         val dataDisposables: CompositeDisposable = CompositeDisposable())
 
 @Module
-abstract class SessionModule {
-    @Binds @AppScope @IntoMap @ClassKey(SessionStore::class)
-    abstract fun provideSessionStoreToMap(store: SessionStore): Store<*>
+class SessionModule {
+    @Provides
+    @AppScope
+    @IntoMap
+    @ClassKey(SessionStore::class)
+    fun provideSessionStore(store: SessionStore): Store<*> = store
 
-    @Binds @AppScope
-    abstract fun provideSessionController(sessionControllerImpl: SessionControllerImpl): SessionController
+    @Provides
+    @AppScope
+    fun provideSessionController(impl: SessionControllerImpl,
+                                 fake: SessionControllerFake): SessionController =
+        if (FirebaseMockModels.USE_FIREBASE_MOCK) fake else impl
+
 }
 
 enum class LoginStatus {
