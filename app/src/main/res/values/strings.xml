@@ -2,6 +2,12 @@
     <string name="app_name">KotlinFirechat</string>
 
     <!-- Login and Create Account Screen  -->
+    <string name="error_invalid_account">There is no user record corresponding to this identifier.</string>
+    <string name="error_invalid_password">The password is invalid or the user does not have a password</string>
+    <string name="error_weak_password">Use another password, last one was so weak</string>
+    <string name="error_invalid_email">Invalid email</string>
+    <string name="error_email_already_exist">An user with this email already exist</string>
+    <string name="error_unknown">Unknown error, please, try again</string>
     <string name="text_dont_have_account">Don\'t have an account?</string>
     <string name="text_already_have_account">Already have an account?</string>
     <string name="button_create_account">Sign Up</string>

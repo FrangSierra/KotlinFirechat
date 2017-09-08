@@ -1,4 +1,4 @@
-package gg.grizzlygrit.common.log
+package frangsierra.kotlinfirechat.common.log
 
 import android.util.Log
 import android.util.Log.*
@@ -8,7 +8,7 @@ import java.util.regex.Pattern
 
 typealias MsgFn = () -> Any?
 
-/** Logging for lazy people.
+/** Logging for lazy publicUserData.
  * Adapted from Jake Wharton's Timber
  * [https://github.com/JakeWharton/timber]
  * */

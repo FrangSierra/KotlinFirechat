@@ -1,4 +1,4 @@
-package frangsierra.kotlinfirechat
+package frangsierra.kotlinfirechat.common.firebase
 
 import com.google.firebase.database.FirebaseDatabase
 
@@ -11,7 +11,7 @@ object FirebaseConstants {
     const val PEOPLE_TABLE_USERNAME = "userName"
     const val PEOPLE_TABLE_SECONDNAME = "secondName"
 
-    val MESSAGE_DATA_REFERENCE = database.reference.child(MESSAGES_TABLE)
+    val MESSAGE_DATA_REFERENCE = database.reference.child(MESSAGES_TABLE).apply { keepSynced(true)}
     val USER_PROFILE_DATA_REFERENCE = database.reference.child(PEOPLE_TABLE)
 
 }

@@ -6,8 +6,10 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.ValueEventListener
-import frangsierra.kotlinfirechat.FirebaseConstants.PEOPLE_TABLE_SECONDNAME
-import frangsierra.kotlinfirechat.FirebaseConstants.PEOPLE_TABLE_USERNAME
+import frangsierra.kotlinfirechat.common.firebase.FirebaseConstants
+import frangsierra.kotlinfirechat.common.firebase.FirebaseConstants.PEOPLE_TABLE_SECONDNAME
+import frangsierra.kotlinfirechat.common.firebase.FirebaseConstants.PEOPLE_TABLE_USERNAME
+import frangsierra.kotlinfirechat.common.firebase.User
 import kotlinx.android.synthetic.main.profile_settings.*
 
 class ProfileActivity : AppCompatActivity() {
