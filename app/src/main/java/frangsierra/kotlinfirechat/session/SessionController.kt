@@ -1,13 +1,19 @@
-package gg.grizzlygrit.authentication
+package frangsierra.kotlinfirechat.session
+
 
 import com.google.firebase.auth.AuthCredential
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
+import com.google.firebase.iid.FirebaseInstanceId
+import com.google.firebase.iid.FirebaseInstanceIdService
 import durdinapps.rxfirebase2.RxFirebaseAuth
+import frangsierra.kotlinfirechat.chat.OnTokenRefreshedAction
+import frangsierra.kotlinfirechat.common.dagger.AppComponent
 import frangsierra.kotlinfirechat.common.dagger.AppScope
 import frangsierra.kotlinfirechat.common.firebase.User
 import frangsierra.kotlinfirechat.common.flux.Dispatcher
-import frangsierra.kotlinfirechat.session.*
+import frangsierra.kotlinfirechat.common.flux.app
+import frangsierra.kotlinfirechat.common.log.Grove
 import javax.inject.Inject
 
 interface SessionController {
@@ -27,7 +33,10 @@ interface SessionController {
 }
 
 @AppScope
-class SessionControllerImpl @Inject constructor(val dispatcher: Dispatcher, val authInstance: FirebaseAuth) : SessionController {
+class SessionControllerImpl @Inject constructor() : SessionController, FirebaseInstanceIdService() {
+    val dispatcher: Dispatcher = app.findComponent(AppComponent::class).dispatcher()
+    val authInstance = FirebaseAuth.getInstance()
+
     override fun tryToLoginWithCredential(state: SessionState, credential: AuthCredential, user: User): SessionState {
         val dataDisposables = state.dataDisposables
         var newAccount: Boolean = false
@@ -79,5 +88,16 @@ class SessionControllerImpl @Inject constructor(val dispatcher: Dispatcher, val 
 
     override fun signOut(state: SessionState): SessionState {
         return state.copy(loggedUser = null, status = LoginStatus.UNLOGGED)
+    }
+
+    override fun onTokenRefresh() {
+        // Get updated InstanceID token.
+        val refreshedToken = FirebaseInstanceId.getInstance().token
+        Grove.d { "Refreshed token: $refreshedToken" }
+
+        // If you want to send messages to this application instance or
+        // manage this apps subscriptions on the server side, send the
+        // Instance ID token to your app server.
+        refreshedToken?.let { dispatcher.dispatchOnUi(OnTokenRefreshedAction(it)) }
     }
 }

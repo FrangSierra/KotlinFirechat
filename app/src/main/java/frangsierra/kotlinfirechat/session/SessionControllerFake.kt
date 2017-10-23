@@ -6,12 +6,10 @@ import frangsierra.kotlinfirechat.common.firebase.FirebaseMockModels
 import frangsierra.kotlinfirechat.common.firebase.User
 import frangsierra.kotlinfirechat.common.flux.Dispatcher
 import frangsierra.kotlinfirechat.common.flux.app
-import gg.grizzlygrit.authentication.SessionController
 import javax.inject.Inject
 
 class SessionControllerFake @Inject constructor() : SessionController {
-
-    private val dispatcher: Dispatcher = app.component.dispatcher()
+       private val dispatcher: Dispatcher = app.component.dispatcher()
 
     override fun tryToLoginWithEmail(state: SessionState, email: String, password: String): SessionState {
         dispatcher.dispatchOnUi(AuthenticationStatusChangedAction(LoginStatus.LOGGED,

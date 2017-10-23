@@ -11,8 +11,7 @@ import frangsierra.kotlinfirechat.common.dagger.AppScope
 import frangsierra.kotlinfirechat.common.firebase.FirebaseMockModels
 import frangsierra.kotlinfirechat.common.flux.Dispatcher
 import frangsierra.kotlinfirechat.common.flux.Store
-import gg.grizzlygrit.authentication.SessionController
-import gg.grizzlygrit.authentication.SessionControllerImpl
+import frangsierra.kotlinfirechat.messaging.TokenStatus
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
 import java.util.concurrent.TimeUnit
@@ -61,6 +60,7 @@ class SessionStore @Inject constructor(val dispatcher: Dispatcher,
 }
 
 data class SessionState(val status: LoginStatus = LoginStatus.LOGGING,
+                        val tokenStatus: TokenStatus = TokenStatus.NULL,
                         val loggedUser: FirebaseUser? = null, val throwable: Throwable? = null,
                         val dataDisposables: CompositeDisposable = CompositeDisposable())
 

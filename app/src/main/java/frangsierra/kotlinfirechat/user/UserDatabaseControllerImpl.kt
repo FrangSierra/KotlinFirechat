@@ -6,6 +6,7 @@ import com.google.firebase.iid.FirebaseInstanceId
 import durdinapps.rxfirebase2.RxFirebaseDatabase
 import durdinapps.rxfirebase2.RxFirebaseUser
 import frangsierra.kotlinfirechat.common.dagger.AppScope
+import frangsierra.kotlinfirechat.common.firebase.FirebaseConstants
 import frangsierra.kotlinfirechat.common.firebase.FirebaseConstants.PEOPLE_TABLE_LAST_LOGIN
 import frangsierra.kotlinfirechat.common.firebase.FirebaseConstants.USER_PROFILE_DATA_REFERENCE
 import frangsierra.kotlinfirechat.common.firebase.User
@@ -21,8 +22,11 @@ class UserDatabaseControllerImpl @Inject constructor(val dispatcher: Dispatcher)
         val currentTimeMillis = System.currentTimeMillis()
         RxFirebaseDatabase.updateChildren(USER_PROFILE_DATA_REFERENCE.child(userId), mapOf(PEOPLE_TABLE_LAST_LOGIN to currentTimeMillis)).subscribe()
 
+        state.messagingToken?.let {
+            RxFirebaseDatabase.updateChildren(FirebaseConstants.USER_PROFILE_DATA_REFERENCE.child(userId), mapOf( FirebaseConstants.MESSAGING_TOKEN to it) )
+                .subscribe()
+        }
         //TODO Retrieve user data if we are gonna use it
-
         return if (state.messagingToken == null) state.copy(userId = userId, messagingToken = instanceId.token)
         else state.copy(userId = userId)
     }
