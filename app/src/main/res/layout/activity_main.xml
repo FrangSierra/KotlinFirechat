@@ -27,7 +27,7 @@
         android:layout_width="match_parent"
         android:orientation="horizontal">
 
-        <ImageButton
+        <ImageView
             android:background="@android:drawable/ic_menu_gallery"
             android:id="@+id/photoPickerButton"
             android:layout_height="36dp"

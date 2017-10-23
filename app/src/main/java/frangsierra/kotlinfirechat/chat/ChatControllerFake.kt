@@ -1,5 +1,6 @@
 package frangsierra.kotlinfirechat.chat
 
+import android.net.Uri
 import com.google.firebase.auth.FirebaseUser
 import durdinapps.rxfirebase2.RxFirebaseChildEvent
 import frangsierra.kotlinfirechat.common.firebase.FirebaseConstants
@@ -53,7 +54,7 @@ class ChatControllerFake @Inject constructor() : ChatController {
         return state.copy(messagesData = newMessageMap)
     }
 
-    override fun sendMessage(state: ChatState, messageText: String): ChatState {
+    override fun sendMessage(state: ChatState, messageText: String, url: Uri?): ChatState {
         val messageToSend = Message(messageText, state.currentUser!!.displayName)
         val newKeyForMessage = FirebaseConstants.MESSAGE_DATA_REFERENCE.push()
         dispatcher.dispatchOnUi(MessageChildRetrievedAction(RxFirebaseChildEvent.EventType.ADDED, newKeyForMessage.key to messageToSend))

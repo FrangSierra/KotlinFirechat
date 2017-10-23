@@ -49,8 +49,8 @@ class ChatStore @Inject constructor(val dispatcher: Dispatcher,
             state = controller.onMessageDataRetrieved(state, type, data)
         }.track()
 
-        dispatcher.subscribe(SendMessageAction::class) { (messageText) ->
-            state = controller.sendMessage(state, messageText)
+        dispatcher.subscribe(SendMessageAction::class) { (messageText, url) ->
+            state = controller.sendMessage(state, messageText, url)
         }.track()
     }
 

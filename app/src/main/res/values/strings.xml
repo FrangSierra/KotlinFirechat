@@ -1,6 +1,13 @@
 <resources>
     <string name="app_name">KotlinFirechat</string>
 
+    <!--Image picker Strings-->
+    <string name="choose_image_picker_text">Choose Image Source</string>
+    <string name="gallery_text">Gallery</string>
+    <string name="camera_text">Camera</string>
+    <string name="choose_image_picture_text">Choose a Picture</string>
+
+
     <!-- Login and Create Account Screen  -->
     <string name="error_invalid_account">There is no user record corresponding to this identifier.</string>
     <string name="error_invalid_password">The password is invalid or the user does not have a password</string>

@@ -3,8 +3,11 @@ package frangsierra.kotlinfirechat.chat
 import android.support.v7.util.DiffUtil
 import android.support.v7.util.DiffUtil.calculateDiff
 import android.support.v7.widget.RecyclerView
+import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
+import com.bumptech.glide.Glide
+import com.bumptech.glide.load.engine.DiskCacheStrategy
 import frangsierra.kotlinfirechat.common.firebase.Message
 import kotlinx.android.synthetic.main.item_message.view.*
 
@@ -16,7 +19,16 @@ class MessageAdapter : RecyclerView.Adapter<MessageAdapter.MessageViewHolder>() 
             holder.messageTextView.text = text
             holder.authorTextView.text = name
             //TODO implement image
-//            holder.photoImageView
+            if (photoUrl == null){
+                holder.photoImageView.visibility = View.GONE
+            } else {
+                Glide.with(holder.authorTextView.context)
+                    .load(photoUrl)
+                    .diskCacheStrategy(DiskCacheStrategy.SOURCE)
+                    .centerCrop()
+                    .into(holder.photoImageView)
+                holder.photoImageView.visibility = View.VISIBLE
+            }
         }
     }
 
@@ -29,7 +41,7 @@ class MessageAdapter : RecyclerView.Adapter<MessageAdapter.MessageViewHolder>() 
         return messageList.size
     }
 
-    fun updateMessages(messages : List<Pair<String, Message>>) {
+    fun updateMessages(messages: List<Pair<String, Message>>) {
         val diffResult = calculateDiff(MessageDiff(this.messageList, messages))
         messageList.clear()
         messageList.addAll(messages)

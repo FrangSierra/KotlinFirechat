@@ -17,12 +17,14 @@ import frangsierra.kotlinfirechat.common.log.LoggerModule
 import frangsierra.kotlinfirechat.session.CreateAccountActivity
 import frangsierra.kotlinfirechat.session.LoginActivity
 import frangsierra.kotlinfirechat.session.SessionModule
+import frangsierra.kotlinfirechat.user.UserStoreModule
 
 @Component(modules = arrayOf(
     AppModule::class,
     LoggerModule::class,
     FirebaseModule::class,
     SessionModule::class,
+    UserStoreModule::class,
     ChatModule::class
 ))
 @AppScope

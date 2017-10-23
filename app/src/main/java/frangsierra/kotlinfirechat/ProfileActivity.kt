@@ -7,7 +7,6 @@ import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.ValueEventListener
 import frangsierra.kotlinfirechat.common.firebase.FirebaseConstants
-import frangsierra.kotlinfirechat.common.firebase.FirebaseConstants.PEOPLE_TABLE_SECONDNAME
 import frangsierra.kotlinfirechat.common.firebase.FirebaseConstants.PEOPLE_TABLE_USERNAME
 import frangsierra.kotlinfirechat.common.firebase.User
 import kotlinx.android.synthetic.main.profile_settings.*
@@ -21,7 +20,6 @@ class ProfileActivity : AppCompatActivity() {
             val currentUserValues = snapshot.getValue(User::class.java)
             currentUserValues?.let {
                 userNameEditText.setText(it.userName)
-                secondNameEditText.setText(it.secondName)
             }
         }
 
@@ -39,11 +37,6 @@ class ProfileActivity : AppCompatActivity() {
                     .child(PEOPLE_TABLE_USERNAME)
                     .setValue(userNameEditText.text.toString())
 
-            if (secondNameEditText.text.isEmpty()) return@setOnClickListener
-            FirebaseConstants.USER_PROFILE_DATA_REFERENCE
-                    .child(auth.currentUser!!.uid)
-                    .child(PEOPLE_TABLE_SECONDNAME)
-                    .setValue(secondNameEditText.text.toString())
         }
 
     }

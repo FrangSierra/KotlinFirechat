@@ -4,8 +4,8 @@ import com.google.firebase.auth.AuthCredential
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import durdinapps.rxfirebase2.RxFirebaseAuth
-import frangsierra.kotlinfirechat.common.firebase.User
 import frangsierra.kotlinfirechat.common.dagger.AppScope
+import frangsierra.kotlinfirechat.common.firebase.User
 import frangsierra.kotlinfirechat.common.flux.Dispatcher
 import frangsierra.kotlinfirechat.session.*
 import javax.inject.Inject
@@ -47,7 +47,7 @@ class SessionControllerImpl @Inject constructor(val dispatcher: Dispatcher, val 
     }
 
     override fun onSessionStatusChange(state: SessionState, loginStatus: LoginStatus, loggedUser: FirebaseUser?): SessionState {
-        //TODO check providers
+
         return state.copy(status = loginStatus, loggedUser = loggedUser)
     }
 
