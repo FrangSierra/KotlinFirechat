@@ -93,10 +93,10 @@ class ChatControllerImpl @Inject constructor(val dispatcher: Dispatcher) : ChatC
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .flatMapCompletable { task ->
-                    RxFirebaseDatabase.setValue( FirebaseConstants.MESSAGE_DATA_REFERENCE.child(newKeyForMessage.key), messageToSend.copy(photoUrl = task.downloadUrl.toString()))
+                    RxFirebaseDatabase.setValue( newKeyForMessage, messageToSend.copy(photoUrl = task.downloadUrl.toString()))
                 }.subscribe()
         } else {
-            FirebaseConstants.MESSAGE_DATA_REFERENCE.child(newKeyForMessage.key).setValue(messageToSend)
+            newKeyForMessage.setValue(messageToSend)
         }
         return state.copy(messagesData = state.messagesData.apply { plus(newKeyForMessage to messageToSend) })
     }

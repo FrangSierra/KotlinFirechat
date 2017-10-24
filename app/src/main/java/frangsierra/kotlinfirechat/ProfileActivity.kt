@@ -38,7 +38,6 @@ class ProfileActivity : AppCompatActivity() {
                     .setValue(userNameEditText.text.toString())
 
         }
-
     }
 
     override fun onStop() {
