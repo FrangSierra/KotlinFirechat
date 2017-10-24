@@ -16,14 +16,27 @@ import io.reactivex.schedulers.Schedulers
 import javax.inject.Inject
 
 interface ChatController {
+
+    /**
+     * Update the user data when the user is correctly logged.
+     */
     fun onUserLogged(state: ChatState, loggedUser: FirebaseUser): ChatState
 
+    /**
+     * Start listening the live changes on the database for the chat reference.
+     */
     fun startListeningChatData(state: ChatState): ChatState
 
+    /**
+     * Manages the state when a new message is retrieved.
+     */
     fun onMessageDataRetrieved(state: ChatState,
                                type: RxFirebaseChildEvent.EventType,
                                message: Pair<String, Message>): ChatState
 
+    /**
+     * Upload the offline and cloud data with a new message, and if needed, upload an attached image.
+     */
     fun sendMessage(state: ChatState, messageText: String, url: Uri?): ChatState
 }
 
@@ -70,6 +83,7 @@ class ChatControllerImpl @Inject constructor(val dispatcher: Dispatcher) : ChatC
         val messageToSend = Message(messageText, state.currentUser!!.displayName, url?.path)
         val newKeyForMessage = FirebaseConstants.MESSAGE_DATA_REFERENCE.push()
 
+        //TODO We could move this to a JobDispatcher and locally save the device path to show the image instantly and upload the image in a service.
         if (url != null){
             val path = firebaseStorage
                 .child("Users")

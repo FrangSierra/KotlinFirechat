@@ -6,11 +6,11 @@ import com.google.android.gms.auth.api.Auth
 import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.common.api.GoogleApiClient
 import com.google.firebase.auth.GoogleAuthProvider
-import frangsierra.kotlinfirechat.chat.ChatActivity
 import frangsierra.kotlinfirechat.R
-import frangsierra.kotlinfirechat.common.firebase.User
+import frangsierra.kotlinfirechat.chat.ChatActivity
 import frangsierra.kotlinfirechat.common.dagger.AppComponent
 import frangsierra.kotlinfirechat.common.dagger.AppComponentFactory
+import frangsierra.kotlinfirechat.common.firebase.User
 import frangsierra.kotlinfirechat.common.flux.FluxActivity
 import frangsierra.kotlinfirechat.util.onError
 import frangsierra.kotlinfirechat.util.tryToGetLoginMessage
@@ -27,7 +27,7 @@ class LoginActivity : FluxActivity<AppComponent>(), GoogleApiClient.OnConnection
     @Inject lateinit var sessionStore: SessionStore
     @Inject lateinit var googleApiClient: GoogleApiClient
 
-    val indeterminateProgressDialog by lazy { indeterminateProgressDialog("Creating account") }
+    private val indeterminateProgressDialog by lazy { indeterminateProgressDialog("Creating account") }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -39,6 +39,8 @@ class LoginActivity : FluxActivity<AppComponent>(), GoogleApiClient.OnConnection
     }
 
     private fun startListeningStoreChanges() {
+
+        //Listen changes in the authentication state to redirect to ChatActivity when an user is logged.
         sessionStore.flowable()
             .map { it.status }
             .distinctUntilChanged()
@@ -52,13 +54,14 @@ class LoginActivity : FluxActivity<AppComponent>(), GoogleApiClient.OnConnection
                 }
             }.track()
 
+        //Listen errors in the store to show the right message if there is an error.
         sessionStore.flowable()
             .filter { it.throwable != null }
-            .map<Throwable> { it.throwable!! }
+            .map { it.throwable!! }
             .distinctUntilChanged()
             .subscribe {
                 indeterminateProgressDialog.dismiss()
-                toast(getString(it!!.tryToGetLoginMessage()))
+                toast(getString(it.tryToGetLoginMessage()))
             }.track()
     }
 

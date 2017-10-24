@@ -27,8 +27,8 @@ class MessagingController @Inject constructor() : FirebaseMessagingService(){
             Grove.d { String.format("Message data payload: %s", remoteMessage.data) }
 
             val pendingIntent = TaskStackBuilder.create(this)
-                // add all of DetailsActivity's parents to the stack,
-                // followed by DetailsActivity itself
+                // add all of ChatActivity's parents to the stack,
+                // followed by ChatActivity itself
                 .addNextIntentWithParentStack(Intent(this, ChatActivity::class.java))
                 .getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT)
 

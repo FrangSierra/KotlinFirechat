@@ -33,18 +33,32 @@ class SessionStore @Inject constructor(val dispatcher: Dispatcher,
                     dispatcher.dispatchOnUi(AuthenticationStatusChangedAction(loginStatus, firebaseAuth.currentUser))
                 }, { throwable -> dispatcher.dispatchOnUi(AuthenticationErrorAction(throwable)) }).track()
         }
-        dispatcher.subscribe(AuthenticationStatusChangedAction::class).flowable().filter { it.loginStatus != state.status }
-            .subscribe { state = controller.onSessionStatusChange(state, it.loginStatus, it.loggedUser) }.track()
+        dispatcher.subscribe(AuthenticationStatusChangedAction::class)
+            .flowable()
+            .filter { it.loginStatus != state.status }
+            .subscribe {
+                state = controller.onSessionStatusChange(state, it.loginStatus, it.loggedUser)
+            }.track()
 
-        dispatcher.subscribe(AuthenticationErrorAction::class) { state = controller.onAuthenticationError(state, it.throwable) }
+        dispatcher.subscribe(AuthenticationErrorAction::class) {
+            state = controller.onAuthenticationError(state, it.throwable)
+        }.track()
 
-        dispatcher.subscribe(AccountSuccessfullyCreatedAction::class) { state = controller.onAccountSuccesfullyCreated(state, it.createdUser) }.track()
+        dispatcher.subscribe(AccountSuccessfullyCreatedAction::class) {
+            state = controller.onAccountSuccesfullyCreated(state, it.createdUser)
+        }.track()
 
-        dispatcher.subscribe(CreateAccountWithEmailAction::class) { state = controller.createAccount(state, it.password, it.user) }.track()
+        dispatcher.subscribe(CreateAccountWithEmailAction::class) {
+            state = controller.createAccount(state, it.password, it.user)
+        }.track()
 
-        dispatcher.subscribe(ManageCredentialAction::class) { state = controller.tryToLoginWithCredential(state, it.credential, it.user) }.track()
+        dispatcher.subscribe(ManageCredentialAction::class) {
+            state = controller.tryToLoginWithCredential(state, it.credential, it.user)
+        }.track()
 
-        dispatcher.subscribe(LoginWithEmailAndPasswordAction::class) { state = controller.tryToLoginWithEmail(state, it.email, it.password) }.track()
+        dispatcher.subscribe(LoginWithEmailAndPasswordAction::class) {
+            state = controller.tryToLoginWithEmail(state, it.email, it.password)
+        }.track()
 
         dispatcher.subscribe(SignOutAction::class) {
             state.dataDisposables.clear()

@@ -48,7 +48,7 @@ class UserDatabaseControllerImpl @Inject constructor(val dispatcher: Dispatcher)
         val newUser = user.copy(email = createdUser.email!!, photoUrl = createdUser.photoUrl.toString(),
             userName = createdUser.displayName, lastLogin = System.currentTimeMillis())
 
-        /// /Push it to database and update the state with the local values
+        //Push it to database and update the state with the local values
         RxFirebaseDatabase.setValue(USER_PROFILE_DATA_REFERENCE.child(createdUser.uid), newUser).subscribe()
 
         return if (createdUser.displayName == null) updateProfileDisplayName(newState, createdUser, user.userName!!)

@@ -94,11 +94,14 @@ class ChatActivity : FluxActivity<AppComponent>() {
                 TC_REQUEST_GALLERY ->
                     if (resultCode == RESULT_OK) {
                         outputFileUri = data!!.data
-                        photoPickerButton.setColorFilter(ContextCompat.getColor(this, R.color.image_picked_color), android.graphics.PorterDuff.Mode.MULTIPLY);
+                        //TODO use a custom XML with an selected tint.
+                        photoPickerButton.setColorFilter(ContextCompat.getColor(this, R.color.image_picked_color),
+                            android.graphics.PorterDuff.Mode.MULTIPLY);
                     }
                 TC_REQUEST_CAMERA ->
                     if (resultCode == RESULT_OK) {
-                        photoPickerButton.setColorFilter(ContextCompat.getColor(this, R.color.image_picked_color), android.graphics.PorterDuff.Mode.MULTIPLY);
+                        photoPickerButton.setColorFilter(ContextCompat.getColor(this, R.color.image_picked_color),
+                            android.graphics.PorterDuff.Mode.MULTIPLY);
                     }
             }
         }
