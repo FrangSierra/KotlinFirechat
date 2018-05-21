@@ -1,6 +1,7 @@
-package frangsierra.kotlinfirechat.common.flux
+package mini.flux
 
 import android.app.Activity
+import frangsierra.kotlinfirechat.common.flux.Action
 
 
 data class OnTrimMemoryAction(val level: Int) : Action

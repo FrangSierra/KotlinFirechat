@@ -1,20 +1,36 @@
 package frangsierra.kotlinfirechat.session
 
-import frangsierra.kotlinfirechat.chat.ChatActivity
-import frangsierra.kotlinfirechat.common.dagger.AppComponent
-import frangsierra.kotlinfirechat.common.firebase.User
+import android.content.Intent
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount
+import com.google.android.gms.auth.api.signin.GoogleSignInClient
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions
+import com.google.android.gms.common.api.ApiException
+import com.google.firebase.auth.AuthCredential
+import frangsierra.kotlinfirechat.R
+import frangsierra.kotlinfirechat.common.flux.FluxActivity
+import frangsierra.kotlinfirechat.session.store.SessionStore
+import frangsierra.kotlinfirechat.util.GoogleLoginCallback
+import frangsierra.kotlinfirechat.util.dismissProgressDialog
 import frangsierra.kotlinfirechat.util.onError
-import frangsierra.kotlinfirechat.util.tryToGetLoginMessage
+import frangsierra.kotlinfirechat.util.toast
 import kotlinx.android.synthetic.main.create_account_activity.*
-import org.jetbrains.anko.indeterminateProgressDialog
-import org.jetbrains.anko.toast
+import javax.inject.Inject
 
-class CreateAccountActivity : frangsierra.kotlinfirechat.common.flux.FluxActivity<AppComponent>() {
-    override fun onCreateComponentFactory() = frangsierra.kotlinfirechat.common.dagger.AppComponentFactory
 
-    @javax.inject.Inject lateinit var sessionStore: frangsierra.kotlinfirechat.session.SessionStore
+class CreateAccountActivity : FluxActivity(), GoogleLoginCallback {
 
-    val indeterminateProgressDialog by lazy { indeterminateProgressDialog("Creating account") }
+    @Inject
+    lateinit var sessionStore: SessionStore
+
+    override val googleApiClient: GoogleSignInOptions by lazy {
+        GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestIdToken(getString(R.string.default_web_client_id))
+                .requestEmail()
+                .build()
+    }
+
+    override val googleSingInClient: GoogleSignInClient by lazy { GoogleSignIn.getClient(this, googleApiClient) }
 
     override fun onCreate(savedInstanceState: android.os.Bundle?) {
         super.onCreate(savedInstanceState)
@@ -24,43 +40,31 @@ class CreateAccountActivity : frangsierra.kotlinfirechat.common.flux.FluxActivit
         startListeningStoreChanges()
     }
 
-    private fun initializeInterface() {
+    private fun startListeningStoreChanges() {
 
-        createAccountButton.setOnClickListener {
-            if (!fieldsAreFilled()) return@setOnClickListener
-            val user = User(userName = editTextUsername.text.toString(), email = editTextEmail.text.toString())
-            dispatcher.dispatch(frangsierra.kotlinfirechat.session.CreateAccountWithEmailAction(user, editTextPassword.text.toString()))
-
-        }
-        signInButton.setOnClickListener {
-            startActivity(android.content.Intent(this, LoginActivity::class.java)
-                .apply { flags = android.content.Intent.FLAG_ACTIVITY_NEW_TASK or android.content.Intent.FLAG_ACTIVITY_CLEAR_TASK })
-        }
     }
 
-    private fun startListeningStoreChanges() {
-        sessionStore.flowable()
-            .map { it.status }
-            .distinctUntilChanged()
-            .subscribe {
-                when (it) {
-                    frangsierra.kotlinfirechat.session.LoginStatus.CREATING_ACCOUNT -> indeterminateProgressDialog.show()
-                    frangsierra.kotlinfirechat.session.LoginStatus.LOGGED -> {
-                        indeterminateProgressDialog.dismiss()
-                        startActivity(android.content.Intent(this, ChatActivity::class.java)
-                            .apply { flags = android.content.Intent.FLAG_ACTIVITY_NEW_TASK or android.content.Intent.FLAG_ACTIVITY_CLEAR_TASK })
-                    }
-                }
-            }.track()
+    private fun initializeInterface() {
+        createAccountButton.setOnClickListener { signInWithEmailAndPassword() }
+        signInButton.setOnClickListener { logInWithGoogle(this) }
+    }
 
-        sessionStore.flowable()
-            .filter { it.throwable != null }
-            .map<Throwable> { it.throwable!! }
-            .distinctUntilChanged()
-            .subscribe {
-                indeterminateProgressDialog.dismiss()
-                toast(getString(it!!.tryToGetLoginMessage()))
-            }.track()
+    private fun signInWithEmailAndPassword() {
+        if (!fieldsAreFilled()) return
+    }
+
+    //How to retrieve SHA1 for Firebase Google Sign In https://stackoverflow.com/questions/15727912/sha-1-fingerprint-of-keystore-certificate
+    private fun signInWithCredential(credential: AuthCredential, email: String) {
+
+    }
+
+    override fun onGoogleCredentialReceived(credential: AuthCredential, account: GoogleSignInAccount) {
+        signInWithCredential(credential, account.email!!)
+    }
+
+    override fun onGoogleSignInFailed(e: ApiException) {
+        dismissProgressDialog()
+        toast(e.toString())
     }
 
     private fun fieldsAreFilled(): Boolean {
@@ -86,5 +90,10 @@ class CreateAccountActivity : frangsierra.kotlinfirechat.common.flux.FluxActivit
         }
         inputPassword.onError(null, false)
         return true
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        manageGoogleResult(requestCode, data)
     }
 }

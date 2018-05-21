@@ -1,4 +1,4 @@
-package gg.grizzlygrit.util
+package frangsierra.kotlinfirechat.util
 
 import android.content.Context
 import android.content.SharedPreferences
