@@ -1,30 +1,31 @@
 package frangsierra.kotlinfirechat.common.flux
 
-import frangsierra.kotlinfirechat.common.rx.DefaultSubscriptionTracker
-import frangsierra.kotlinfirechat.common.rx.SubscriptionTracker
+import android.support.annotation.CallSuper
 import io.reactivex.Flowable
+import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.disposables.Disposable
 import io.reactivex.processors.PublishProcessor
+import org.jetbrains.annotations.TestOnly
 import java.lang.reflect.ParameterizedType
-import kotlin.reflect.KClass
+import javax.inject.Inject
 
-abstract class Store<S : Any> : SubscriptionTracker by DefaultSubscriptionTracker() {
+abstract class Store<S : Any> : AutoCloseable {
 
     open val properties: StoreProperties = StoreProperties()
 
-    private var initialized = false
+    @Inject protected lateinit var dispatcher: Dispatcher
+
+    private val disposables = CompositeDisposable()
     private var _state: S? = null
-    val processor = PublishProcessor.create<S>()
+    private val processor = PublishProcessor.create<S>()
+
 
     var state: S
         get() {
-            if (_state == null) {
-                synchronized(this) {
-                    if (_state == null) _state = initialState()
-                }
-            }
+            if (_state == null) _state = initialState()
             return _state!!
         }
-        set(value) {
+        protected set(value) {
             if (value != _state) {
                 _state = value
                 processor.onNext(value)
@@ -33,14 +34,14 @@ abstract class Store<S : Any> : SubscriptionTracker by DefaultSubscriptionTracke
 
     @Suppress("UNCHECKED_CAST")
     protected open fun initialState(): S {
+        val type = (javaClass.genericSuperclass as ParameterizedType).actualTypeArguments[0]
+                as Class<S>
         try {
-            val type = (javaClass.genericSuperclass as ParameterizedType).actualTypeArguments[0]
-                    as Class<S>
             val constructor = type.getDeclaredConstructor()
             constructor.isAccessible = true
             return constructor.newInstance()
         } catch (e: Exception) {
-            throw RuntimeException("Missing default no-args constructor for the state", e)
+            throw RuntimeException("Missing default no-args constructor for the state $type", e)
         }
     }
 
@@ -51,50 +52,30 @@ abstract class Store<S : Any> : SubscriptionTracker by DefaultSubscriptionTracke
         }
     }
 
-    /**
-     * Perform initialization, will have effect exactly once.
-     */
-    fun initOnce() {
-        if (initialized) return
-        synchronized(this) {
-            if (initialized) return
-            initialized = true
-            init()
-        }
+    fun Disposable.track() {
+        disposables.add(this)
+    }
+
+    @CallSuper
+    override fun close() {
+        disposables.dispose()
+    }
+
+    @TestOnly
+    fun setTestState(other: S) {
+        this.state = other
+    }
+
+    @TestOnly
+    fun resetState() {
+        state = initialState()
     }
 
     /**
-     * Initialize the store. Called after all stores instances are ready.
+     * Initialize the store. Called after all stores constructors ar
      */
-    protected abstract fun init()
-
-    /**
-     * Release resources.
-     */
-    fun dispose() {
-        //No-op
-    }
+    abstract fun init()
 }
-
-/**
- * Type safe store lookup.
- */
-@Suppress("UNCHECKED_CAST")
-fun <T : Store<*>> StoreMap.find(clazz: KClass<T>): T {
-    val java: Class<Store<*>> = (clazz.java) as Class<Store<*>>
-    return this[java]!! as T
-}
-
-//fun  Store<*>.combined(@Nonnull store: Store<*>): Flowable<Store<*>> = combined(listOf(store))
-//
-//fun  Store<*>.combined(@Nonnull stores: List<Store<*>>): Flowable<Store<*>> {
-//    return flowable().map { this }
-//            .apply {
-//                stores.forEach { store ->
-//                    mergeWith(store.flowable().map { store })
-//                }
-//            }
-//}
 
 /**
  * Store meta properties.

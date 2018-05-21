@@ -14,7 +14,12 @@ import io.reactivex.subjects.PublishSubject
 import java.util.*
 import java.util.concurrent.atomic.AtomicInteger
 import kotlin.collections.ArrayList
+import kotlin.collections.HashMap
 import kotlin.reflect.KClass
+import kotlin.reflect.jvm.jvmErasure
+
+
+private val actionTagsCache = HashMap<Class<*>, Set<Class<*>>>()
 
 /**
  * Common interface for all actions.
@@ -26,8 +31,21 @@ interface Action {
     /**
      * List of types this action may be observed by.
      */
-    val tags: Array<Class<*>>
-        get() = arrayOf(Any::class.java, this.javaClass)
+    val tags: Set<Class<*>>
+        get() {
+            return actionTagsCache.getOrPut(this::class.java) {
+                return reflectActionTypes(this::class)
+            }
+        }
+}
+
+internal fun reflectActionTypes(type: KClass<*>): Set<Class<*>> {
+    return type.supertypes
+            .map { (it.jvmErasure.java as Class<*>).kotlin }
+            .map { reflectActionTypes(it) }
+            .flatten()
+            .plus(type.java)
+            .toSet()
 }
 
 /**
@@ -45,7 +63,9 @@ abstract class TracedAction : Action {
 }
 
 
-typealias Interceptor = (Action, Chain) -> Action
+typealias Interceptor = (action: Action, chain: Chain) -> Action
+
+val actionCounter = AtomicInteger()
 
 /**
  * A chain of interceptors. Call [.proceed] with
@@ -55,12 +75,15 @@ interface Chain {
     fun proceed(action: Action): Action
 }
 
+
+val HIGH_PRIORITY: Int = 0
+val MEDIUM_PRIORITY: Int = 50
+
 /**
  * Dispatch actions and subscribe to them in order to produce changes.
  */
 class Dispatcher(var verifyThreads: Boolean = true) {
     val DEFAULT_PRIORITY: Int = 100
-    val HIGH_PRIORITY: Int = 50
 
     val subscriptionCount: Int get() = subscriptionMap.values.map { it?.size ?: 0 }.sum()
     var dispatching: Boolean = false
@@ -85,9 +108,7 @@ class Dispatcher(var verifyThreads: Boolean = true) {
         return interceptors.fold(rootChain)
         { chain, interceptor ->
             object : Chain {
-                override fun proceed(action: Action): Action {
-                    return interceptor(action, chain)
-                }
+                override fun proceed(action: Action): Action = interceptor(action, chain)
             }
         }
     }
@@ -111,6 +132,7 @@ class Dispatcher(var verifyThreads: Boolean = true) {
         synchronized(this) {
             try {
                 if (dispatching) error("Can't dispatch actions while reducing state!")
+                actionCounter.incrementAndGet()
                 dispatching = true
                 chain.proceed(action)
             } finally {
@@ -138,8 +160,7 @@ class Dispatcher(var verifyThreads: Boolean = true) {
         onUiSync { dispatch(action) }
     }
 
-    fun <T : Any> subscribe(tag: KClass<T>, fn: (T) -> Unit = {})
-            = subscribe(DEFAULT_PRIORITY, tag, fn)
+    fun <T : Any> subscribe(tag: KClass<T>, fn: (T) -> Unit = {}) = subscribe(DEFAULT_PRIORITY, tag, fn)
 
     fun <T : Any> subscribe(priority: Int,
                             tag: KClass<T>,
@@ -170,7 +191,7 @@ class Dispatcher(var verifyThreads: Boolean = true) {
     internal fun <T : Any> unregisterInternal(dispatcherSubscription: DispatcherSubscription<T>) {
         synchronized(this) {
             val set = subscriptionMap[dispatcherSubscription.tag] as? TreeSet<*>
-            val removed = set?.remove(dispatcherSubscription) ?: false
+            val removed = set?.remove(dispatcherSubscription) == true
             if (!removed) {
                 Grove.w { "Failed to remove dispatcherSubscription, multiple dispose calls?" }
             }
@@ -182,7 +203,7 @@ class DispatcherSubscription<T : Any>(internal val dispatcher: Dispatcher,
                                       internal val id: Int,
                                       internal val priority: Int,
                                       internal val tag: Class<T>,
-                                      internal val cb: (T) -> Unit) : Disposable {
+                                      private val cb: (T) -> Unit) : Disposable {
     private var processor: PublishProcessor<T>? = null
     private var subject: PublishSubject<T>? = null
     private var disposed = false
