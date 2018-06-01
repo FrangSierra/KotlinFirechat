@@ -1,4 +1,4 @@
-package frangsierra.kotlinfirechat.common.firebase
+package frangsierra.kotlinfirechat.core.firebase
 
 
 object FirebaseConstants {

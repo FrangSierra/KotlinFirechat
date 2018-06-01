@@ -77,25 +77,9 @@
         android:textColor="@android:color/white"
         android:textSize="@dimen/login_buttons_text_size" />
 
-    <LinearLayout
-        android:gravity="center"
+    <com.google.android.gms.common.SignInButton
+        android:id="@+id/createGoogleButton"
         android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/margin_small"
-        android:layout_width="match_parent"
-        android:orientation="horizontal">
+        android:layout_width="match_parent" />
 
-        <TextView
-            style="@style/LoginCreateText"
-            android:id="@+id/alreadyHaveAcccountText"
-            android:layout_height="wrap_content"
-            android:layout_width="wrap_content"
-            android:text="@string/text_already_have_account" />
-
-        <TextView
-            style="@style/LoginCreateTextButton"
-            android:id="@+id/signInButton"
-            android:layout_height="wrap_content"
-            android:layout_width="wrap_content"
-            android:text="@string/button_sign_in" />
-    </LinearLayout>
 </LinearLayout>

@@ -1,5 +1,7 @@
 package frangsierra.kotlinfirechat.session.store
 
+import frangsierra.kotlinfirechat.core.firebase.User
+import frangsierra.kotlinfirechat.session.model.LoginProvider
 import frangsierra.kotlinfirechat.util.Task
 
 data class SessionState(val verified: Boolean = false,

@@ -1,4 +1,4 @@
-package frangsierra.kotlinfirechat.common.flux
+package frangsierra.kotlinfirechat.core.flux
 
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
