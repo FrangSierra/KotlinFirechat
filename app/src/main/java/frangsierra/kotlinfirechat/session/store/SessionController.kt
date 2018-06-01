@@ -1,10 +1,9 @@
 package frangsierra.kotlinfirechat.session.store
 
 import com.google.firebase.auth.*
-import frangsierra.kotlinfirechat.common.dagger.AppScope
-import frangsierra.kotlinfirechat.common.flux.Dispatcher
+import frangsierra.kotlinfirechat.core.dagger.AppScope
+import mini.Dispatcher
 import javax.inject.Inject
-
 
 interface SessionController {
 
@@ -73,7 +72,6 @@ interface SessionController {
      * @param email The email of the [User]
      */
     fun linkCredentialToUser(credential: AuthCredential, email: String)
-
 
     /**
      * Unlink a provider from a [FirebaseUser] instance.

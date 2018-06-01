@@ -4,18 +4,29 @@ import dagger.Binds
 import dagger.Module
 import dagger.multibindings.ClassKey
 import dagger.multibindings.IntoMap
-import frangsierra.kotlinfirechat.common.dagger.AppScope
-import frangsierra.kotlinfirechat.common.flux.Store
+import frangsierra.kotlinfirechat.core.dagger.AppScope
+import mini.Reducer
+import mini.Store
 import javax.inject.Inject
 
 @AppScope
 class SessionStore @Inject constructor() : Store<SessionState>() {
-    override fun init() {
 
+    @Reducer
+    fun loginWithCredentials(action: LoginWithCredentials, state : SessionState) : SessionState {
+        return state
+    }
+
+    @Reducer
+    fun loginComplete(action: LoginCompleteAction, state : SessionState) : SessionState {
+    return state
+    }
+
+    @Reducer
+    fun loginWithProvider(action: LoginWithProviderCredentials, state : SessionState) : SessionState {
+        return state
     }
 }
-
-data class SessionState(val string: String)
 
 @Module
 abstract class SessionModule {

@@ -9,7 +9,7 @@ import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
 import com.google.firebase.auth.AuthCredential
 import com.google.firebase.auth.GoogleAuthProvider
-import frangsierra.kotlinfirechat.common.log.Grove
+import mini.Grove
 
 const val RC_SIGN_IN = 1001
 
