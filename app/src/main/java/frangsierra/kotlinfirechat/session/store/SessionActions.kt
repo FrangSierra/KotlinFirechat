@@ -96,5 +96,5 @@ data class CreateAccountWithProviderCredentialsAction(val credential: AuthCreden
 data class CreateAccountCompleteAction(val user: User?,
                                        val alreadyExisted: Boolean = false,
                                        val emailVerified: Boolean = false,
-                                       val Task: Task,
+                                       val task: Task,
                                        val associatedProviders: List<LoginProvider> = listOf()) : Action
