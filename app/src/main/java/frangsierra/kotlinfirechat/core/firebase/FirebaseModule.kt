@@ -1,4 +1,4 @@
-package frangsierra.kotlinfirechat.common.firebase
+package frangsierra.kotlinfirechat.core.firebase
 
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.auth.FirebaseAuth

@@ -6,6 +6,8 @@ import dagger.multibindings.ClassKey
 import dagger.multibindings.IntoMap
 import frangsierra.kotlinfirechat.core.dagger.AppScope
 import frangsierra.kotlinfirechat.core.flux.prefs
+import frangsierra.kotlinfirechat.session.controller.SessionController
+import frangsierra.kotlinfirechat.session.controller.SessionControllerImpl
 import frangsierra.kotlinfirechat.util.taskRunning
 import mini.Reducer
 import mini.Store
@@ -61,11 +63,49 @@ class SessionStore @Inject constructor(val controller: SessionController) : Stor
             prefs.loggedUserId = action.user!!.uid //Update the shared prefs of the current user
             prefs.loggedUsername = action.user.username //Update the shared prefs of the current user
         }
-        return state.copy(
-            loggedUser = action.user,
-            createAccountTask = action.task,
-            verified = action.emailVerified,
-            providers = action.associatedProviders)
+        return state.copy(loggedUser = action.user, createAccountTask = action.task,
+            verified = action.emailVerified, providers = action.associatedProviders)
+    }
+
+    @Reducer
+    fun verifyUserEmail(action: VerifyUserEmailAction, state: SessionState): SessionState {
+        if (state.verifyUserTask.isRunning()) return state
+        controller.verifyUser()
+        return state.copy(verifyUserTask = taskRunning())
+    }
+
+    @Reducer
+    fun userEmailVerified(action: VerifyUserEmailCompleteAction, state: SessionState): SessionState {
+        if (!state.verifyUserTask.isRunning()) return state
+        return state.copy(verifyUserTask = action.task, verified = action.verified)
+    }
+
+    @Reducer
+    fun sendVerificationEmail(action: CreateAccountCompleteAction, state: SessionState): SessionState {
+        if (state.verificationEmailTask.isRunning()) return state
+        controller.sendVerificationEmail()
+        return state.copy(verificationEmailTask = taskRunning())
+    }
+
+    @Reducer
+    fun verificationEmailSent(action: CreateAccountCompleteAction, state: SessionState): SessionState {
+        if (!state.verificationEmailTask.isRunning()) return state
+        return state.copy(verificationEmailTask = action.task)
+    }
+
+    @Reducer
+    fun tryToLoginOnFirstInstance(action: TryToLoginInFirstInstanceAction, state: SessionState): SessionState {
+        if (state.loginTask.isRunning()) return state
+        controller.tryToLoginInFirstInstance()
+        return state.copy(loginTask = taskRunning())
+    }
+
+    @Reducer
+    fun signOut(action: SignOutAction, state: SessionState): SessionState {
+        controller.signOut()
+        prefs.loggedUserId = null //Update the shared prefs of the current user
+        prefs.loggedUsername = null //Update the shared prefs of the current user
+        return initialState()
     }
 }
 

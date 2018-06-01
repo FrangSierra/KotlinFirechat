@@ -7,16 +7,15 @@ import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
 import com.google.firebase.auth.AuthCredential
+import frangsierra.kotlinfirechat.home.HomeActivity
 import frangsierra.kotlinfirechat.R
-import frangsierra.kotlinfirechat.common.flux.FluxActivity
+import frangsierra.kotlinfirechat.core.flux.FluxActivity
+import frangsierra.kotlinfirechat.session.store.CreateAccountWithCredentialsAction
+import frangsierra.kotlinfirechat.session.store.CreateAccountWithProviderCredentialsAction
 import frangsierra.kotlinfirechat.session.store.SessionStore
-import frangsierra.kotlinfirechat.util.GoogleLoginCallback
-import frangsierra.kotlinfirechat.util.dismissProgressDialog
-import frangsierra.kotlinfirechat.util.onError
-import frangsierra.kotlinfirechat.util.toast
+import frangsierra.kotlinfirechat.util.*
 import kotlinx.android.synthetic.main.create_account_activity.*
 import javax.inject.Inject
-
 
 class CreateAccountActivity : FluxActivity(), GoogleLoginCallback {
 
@@ -25,9 +24,9 @@ class CreateAccountActivity : FluxActivity(), GoogleLoginCallback {
 
     override val googleApiClient: GoogleSignInOptions by lazy {
         GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                .requestIdToken(getString(R.string.default_web_client_id))
-                .requestEmail()
-                .build()
+            .requestIdToken(getString(R.string.default_web_client_id))
+            .requestEmail()
+            .build()
     }
 
     override val googleSingInClient: GoogleSignInClient by lazy { GoogleSignIn.getClient(this, googleApiClient) }
@@ -37,29 +36,43 @@ class CreateAccountActivity : FluxActivity(), GoogleLoginCallback {
         setContentView(frangsierra.kotlinfirechat.R.layout.create_account_activity)
 
         initializeInterface()
-        startListeningStoreChanges()
-    }
-
-    private fun startListeningStoreChanges() {
-
     }
 
     private fun initializeInterface() {
         createAccountButton.setOnClickListener { signInWithEmailAndPassword() }
-        signInButton.setOnClickListener { logInWithGoogle(this) }
+        createGoogleButton.setOnClickListener { logInWithGoogle(this) }
     }
 
     private fun signInWithEmailAndPassword() {
         if (!fieldsAreFilled()) return
+        showProgressDialog("Creating account")
+        dispatcher.dispatch(CreateAccountWithCredentialsAction(editTextEmail.text.toString(), editTextPassword.text.toString(), editTextUsername.text.toString()))
+        sessionStore.flowable()
+            .filterOne { it.createAccountTask.isTerminal() } //Wait for request to finish
+            .subscribe {
+                if (it.createAccountTask.isSuccessful() && it.loggedUser != null) {
+                    if (it.verified) goToHome() else goToVerificationEmailScreen()
+                } else if (it.createAccountTask.isFailure()) {
+                    it.createAccountTask.error!!.message?.let { toast(it) }
+                }
+                dismissProgressDialog()
+            }.track()
     }
 
     //How to retrieve SHA1 for Firebase Google Sign In https://stackoverflow.com/questions/15727912/sha-1-fingerprint-of-keystore-certificate
-    private fun signInWithCredential(credential: AuthCredential, email: String) {
-
-    }
-
     override fun onGoogleCredentialReceived(credential: AuthCredential, account: GoogleSignInAccount) {
-        signInWithCredential(credential, account.email!!)
+        showProgressDialog("Creating account")
+        dispatcher.dispatch(CreateAccountWithProviderCredentialsAction(credential, GoogleSignInApiUtils.getUserData(account)))
+        sessionStore.flowable()
+            .filterOne { it.createAccountTask.isTerminal() } //Wait for request to finish
+            .subscribe {
+                if (it.createAccountTask.isSuccessful() && it.loggedUser != null) {
+                    if (it.verified) goToHome() else goToVerificationEmailScreen()
+                } else if (it.createAccountTask.isFailure()) {
+                    it.createAccountTask.error!!.message?.let { toast(it) }
+                }
+                dismissProgressDialog()
+            }.track()
     }
 
     override fun onGoogleSignInFailed(e: ApiException) {
@@ -90,6 +103,20 @@ class CreateAccountActivity : FluxActivity(), GoogleLoginCallback {
         }
         inputPassword.onError(null, false)
         return true
+    }
+
+    private fun goToHome() {
+        dismissProgressDialog()
+        val intent = HomeActivity.newIntent(this).apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        }
+        startActivity(intent)
+    }
+
+    private fun goToVerificationEmailScreen() {
+        dismissProgressDialog()
+        EmailVerificationActivity.startActivity(this, sessionStore.state.loggedUser!!.email)
+        overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {

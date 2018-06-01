@@ -1,10 +1,4 @@
-package frangsierra.kotlinfirechat.session.store
-
-data class User(val uid: String,
-                val username: String,
-                val photoUrl: String?,
-                val email: String)
-
+package frangsierra.kotlinfirechat.session.model
 
 /**
  * Represent the possible providers used in the application.

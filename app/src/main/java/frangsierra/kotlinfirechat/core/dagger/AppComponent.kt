@@ -5,10 +5,12 @@ import android.content.Context
 import dagger.Component
 import dagger.Module
 import dagger.Provides
-import frangsierra.kotlinfirechat.common.firebase.FirebaseModule
+import frangsierra.kotlinfirechat.core.firebase.FirebaseModule
 import frangsierra.kotlinfirechat.core.flux.App
-import frangsierra.kotlinfirechat.common.flux.FluxActivity
+import frangsierra.kotlinfirechat.core.flux.FluxActivity
+import frangsierra.kotlinfirechat.home.HomeActivity
 import frangsierra.kotlinfirechat.session.CreateAccountActivity
+import frangsierra.kotlinfirechat.session.EmailVerificationActivity
 import frangsierra.kotlinfirechat.session.LoginActivity
 import frangsierra.kotlinfirechat.session.store.SessionModule
 import mini.Dispatcher
@@ -28,6 +30,8 @@ interface DefaultAppComponent : AppComponent {
     fun inject(target: FluxActivity)
     fun inject(target: LoginActivity)
     fun inject(target: CreateAccountActivity)
+    fun inject(target: EmailVerificationActivity)
+    fun inject(target: HomeActivity)
 }
 
 @Module
