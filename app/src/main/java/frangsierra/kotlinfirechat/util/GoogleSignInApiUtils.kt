@@ -1,7 +1,7 @@
 package frangsierra.kotlinfirechat.util
 
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
-import frangsierra.kotlinfirechat.core.firebase.User
+import frangsierra.kotlinfirechat.session.model.User
 
 object GoogleSignInApiUtils {
 

@@ -5,6 +5,7 @@ import android.content.Context
 import dagger.Component
 import dagger.Module
 import dagger.Provides
+import frangsierra.kotlinfirechat.chat.store.ChatModule
 import frangsierra.kotlinfirechat.core.firebase.FirebaseModule
 import frangsierra.kotlinfirechat.core.flux.App
 import frangsierra.kotlinfirechat.core.flux.FluxActivity
@@ -24,6 +25,7 @@ interface AppComponent {
 @AppScope
 @Component(modules = [(AppModule::class),
     (FirebaseModule::class),
+    (ChatModule::class),
     (SessionModule::class)])
 
 interface DefaultAppComponent : AppComponent {

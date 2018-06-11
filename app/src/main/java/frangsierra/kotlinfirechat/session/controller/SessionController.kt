@@ -2,11 +2,7 @@ package frangsierra.kotlinfirechat.session.controller
 
 import com.google.firebase.auth.*
 import frangsierra.kotlinfirechat.core.dagger.AppScope
-import frangsierra.kotlinfirechat.core.firebase.User
-import frangsierra.kotlinfirechat.core.firebase.associatedProviders
-import frangsierra.kotlinfirechat.core.firebase.toUser
-import frangsierra.kotlinfirechat.session.model.FirebaseUserNotFound
-import frangsierra.kotlinfirechat.session.model.ProviderNotLinkedException
+import frangsierra.kotlinfirechat.session.model.*
 import frangsierra.kotlinfirechat.session.store.CreateAccountCompleteAction
 import frangsierra.kotlinfirechat.session.store.LoginCompleteAction
 import frangsierra.kotlinfirechat.session.store.VerificationEmailSentAction
