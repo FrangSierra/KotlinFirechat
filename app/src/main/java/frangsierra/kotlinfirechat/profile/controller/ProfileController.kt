@@ -1,9 +1,11 @@
 package frangsierra.kotlinfirechat.profile.controller
 
 import com.google.android.gms.tasks.Tasks
+import com.google.firebase.Timestamp
 import com.google.firebase.firestore.FirebaseFirestore
 import frangsierra.kotlinfirechat.core.dagger.AppScope
 import frangsierra.kotlinfirechat.core.firebase.*
+import frangsierra.kotlinfirechat.core.firebase.FirebaseConstants.LAST_LOGIN
 import frangsierra.kotlinfirechat.core.flux.doAsync
 import frangsierra.kotlinfirechat.profile.model.PrivateData
 import frangsierra.kotlinfirechat.profile.model.PublicProfile
@@ -26,11 +28,16 @@ class ProfileControllerImpl @Inject constructor(private val firestore: FirebaseF
             try {
                 val privateData = getAndCreateIfNoyExistsPrivateData(user)
                 val publicProfile = getAndCreateIfNotExistsPublicData(user)
+                updateUserLastLogin(userId = user.uid)
                 dispatcher.dispatchOnUi(LoadUserDataCompleteAction(privateData, publicProfile, taskSuccess()))
             } catch (e: Throwable) {
                 dispatcher.dispatchOnUi(LoadUserDataCompleteAction(null, null, taskFailure(e)))
             }
         }
+    }
+
+    private fun updateUserLastLogin(userId: String) {
+        Tasks.await(firestore.publicProfileDoc(userId).update(LAST_LOGIN, Timestamp.now()))
     }
 
     private fun getAndCreateIfNoyExistsPrivateData(user: User): PrivateData {

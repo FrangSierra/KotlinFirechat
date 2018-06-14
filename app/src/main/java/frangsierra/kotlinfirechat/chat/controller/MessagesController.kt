@@ -8,8 +8,9 @@ import frangsierra.kotlinfirechat.chat.store.MessagesLoadedAction
 import frangsierra.kotlinfirechat.chat.store.SendMessageCompleteAction
 import frangsierra.kotlinfirechat.core.dagger.AppScope
 import frangsierra.kotlinfirechat.core.firebase.*
+import frangsierra.kotlinfirechat.core.firebase.FirebaseConstants.TOTAL_MESSAGES
 import frangsierra.kotlinfirechat.core.flux.doAsync
-import frangsierra.kotlinfirechat.profile.model.UserData
+import frangsierra.kotlinfirechat.profile.model.PublicProfile
 import frangsierra.kotlinfirechat.util.taskFailure
 import frangsierra.kotlinfirechat.util.taskSuccess
 import io.reactivex.BackpressureStrategy
@@ -20,7 +21,7 @@ import javax.inject.Inject
 
 interface ChatController {
     fun startListeningMessages()
-    fun sendMessage(message: String, userData: UserData)
+    fun sendMessage(message: String, publicProfile: PublicProfile)
 }
 
 @AppScope
@@ -34,13 +35,17 @@ class ChatControllerImpl @Inject constructor(private val firestore: FirebaseFire
         dispatcher.dispatchOnUi(ListeningChatMessagesCompleteAction(disposable))
     }
 
-    override fun sendMessage(message: String, userData: UserData) {
+    override fun sendMessage(message: String, publicProfile: PublicProfile) {
         doAsync {
             val newId = firestore.messages().document().id
-            val firebaseMessage = FirebaseMessage(userData.toFirebaseUserData(), message)
+            val firebaseMessage = FirebaseMessage(publicProfile.userData.toFirebaseUserData(), message)
 
             try {
-                Tasks.await(firestore.messageDoc(newId).set(firebaseMessage))
+                val batch = firestore.batch()
+                batch.set(firestore.messageDoc(newId), firebaseMessage)
+                batch.update(firestore.publicProfileDoc(publicProfile.userData.uid),
+                        mapOf(TOTAL_MESSAGES to publicProfile.totalMessages.plus(1)))
+                Tasks.await(batch.commit())
 
                 dispatcher.dispatchOnUi(SendMessageCompleteAction(firebaseMessage.toMessage(newId), taskSuccess()))
             } catch (e: Throwable) {
