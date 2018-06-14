@@ -1,21 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                                             xmlns:app="http://schemas.android.com/apk/res-auto"
-                                             xmlns:tools="http://schemas.android.com/tools"
-                                             android:id="@+id/user_data_item_layout"
-                                             android:layout_width="match_parent"
-                                             android:layout_height="wrap_content">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/user_data_item_layout"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
 
     <ImageView
         android:id="@+id/comment_author_picture"
+        android:layout_width="48dp"
         android:layout_height="48dp"
         android:layout_margin="8dp"
-        android:layout_marginBottom="8dp"
         android:layout_marginStart="8dp"
-        android:layout_width="48dp"
-        app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_marginTop="8dp"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"/>
+        app:layout_constraintTop_toTopOf="@+id/comment_author_username" />
 
     <TextView
         android:id="@+id/comment_author_username"
@@ -24,31 +23,35 @@
         android:layout_marginEnd="16dp"
         android:layout_marginStart="8dp"
         android:textSize="16sp"
+        app:layout_constraintBottom_toTopOf="@+id/comment_description"
         app:layout_constraintEnd_toStartOf="@id/comment_time_ago"
+        app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintHorizontal_chainStyle="spread_inside"
         app:layout_constraintStart_toEndOf="@+id/comment_author_picture"
-        app:layout_constraintTop_toTopOf="@+id/comment_author_picture"
+        app:layout_constraintTop_toTopOf="parent"
         tools:text="Francisco García Sierra" />
 
     <TextView
         android:id="@+id/comment_time_ago"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginBottom="8dp"
         android:layout_marginEnd="16dp"
-        android:layout_width="wrap_content"
         android:textSize="14sp"
         app:layout_constraintBottom_toBottomOf="@+id/comment_description"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@id/comment_author_username"
-        tools:text="4d"/>
+        tools:text="4d" />
 
     <TextView
         android:id="@+id/comment_description"
         android:layout_width="0dp"
-        android:textSize="14sp"
         android:layout_height="wrap_content"
         android:padding="8dp"
+        android:textSize="14sp"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toEndOf="@+id/comment_author_picture"
         app:layout_constraintTop_toBottomOf="@+id/comment_author_username"
         tools:text="Un entrenamiento genial! Es alucinante que hayas logrado tanto progreso en tan poco tiempo!" />

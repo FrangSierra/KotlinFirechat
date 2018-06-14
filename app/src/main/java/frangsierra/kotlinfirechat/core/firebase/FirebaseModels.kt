@@ -43,7 +43,7 @@ data class FirebasePublicProfile(
         val userData: FirebaseUserData = FirebaseUserData(),
         val lowerCaseUsername: String = "",
         val totalMessages: Int = 0,
-        @ServerTimestamp val timestamp: Date? = null
+        @ServerTimestamp val lastLogin: Timestamp? = null
 )
 
 fun DocumentSnapshot.toPublicProfile() = toObject(FirebasePublicProfile::class.java)!!.toPublicProfile()
@@ -51,4 +51,4 @@ fun DocumentSnapshot.toPublicProfile() = toObject(FirebasePublicProfile::class.j
 fun FirebasePublicProfile.toPublicProfile() = PublicProfile(userData = userData.toUserData(),
         lowerCaseUsername = lowerCaseUsername,
         totalMessages = totalMessages,
-        timestamp = timestamp)
+        lastLogin = lastLogin?.toDate() ?: Timestamp.now().toDate())

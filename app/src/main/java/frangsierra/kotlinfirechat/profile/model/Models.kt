@@ -14,7 +14,7 @@ data class PublicProfile(
         val userData: UserData = UserData(),
         val lowerCaseUsername: String = "",
         val totalMessages: Int = 0,
-        @ServerTimestamp val timestamp: Date? = null
+        val lastLogin: Date
 )
 
 data class UserData(val username: String = "",
