@@ -6,5 +6,6 @@
 
     <color name="dark_grey">#AEAEAE</color>
     <color name="black">#616161</color>
+    <color name="splash">#4187dc</color>
     <color name="image_picked_color">#22bf1d</color>
 </resources>

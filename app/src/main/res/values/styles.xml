@@ -26,4 +26,9 @@
         <item name="android:clickable">true</item>
     </style>
 
+    <!--Splash screen-->
+    <style name="SplashTheme" parent="Theme.AppCompat.NoActionBar">
+        <item name="android:windowBackground">@color/splash</item>
+    </style>
+
 </resources>

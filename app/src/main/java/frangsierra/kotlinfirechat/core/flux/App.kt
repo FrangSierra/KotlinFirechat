@@ -41,7 +41,8 @@ class App : Application() {
                 .appModule(AppModule(this))
                 .build()
             _appComponent!!.dispatcher().actionReducer = MiniActionReducer(stores = _appComponent!!.stores())
-            _appComponent!!.dispatcher().addInterceptor(CustomLoggerInterceptor(_appComponent!!.stores().values))
+            _appComponent!!.dispatcher().addInterceptor(CustomLoggerInterceptor
+            (_appComponent!!.stores().values))
         }
     }
 }

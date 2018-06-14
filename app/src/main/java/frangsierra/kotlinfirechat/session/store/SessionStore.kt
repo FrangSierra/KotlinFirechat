@@ -81,14 +81,14 @@ class SessionStore @Inject constructor(val controller: SessionController) : Stor
     }
 
     @Reducer
-    fun sendVerificationEmail(action: CreateAccountCompleteAction, state: SessionState): SessionState {
+    fun sendVerificationEmail(action: SendVerificationEmailAction, state: SessionState): SessionState {
         if (state.verificationEmailTask.isRunning()) return state
         controller.sendVerificationEmail()
         return state.copy(verificationEmailTask = taskRunning())
     }
 
     @Reducer
-    fun verificationEmailSent(action: CreateAccountCompleteAction, state: SessionState): SessionState {
+    fun verificationEmailSent(action: VerificationEmailSentAction, state: SessionState): SessionState {
         if (!state.verificationEmailTask.isRunning()) return state
         return state.copy(verificationEmailTask = action.task)
     }

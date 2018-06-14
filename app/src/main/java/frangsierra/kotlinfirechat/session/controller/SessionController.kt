@@ -1,7 +1,9 @@
 package frangsierra.kotlinfirechat.session.controller
 
+import com.google.android.gms.tasks.Tasks
 import com.google.firebase.auth.*
 import frangsierra.kotlinfirechat.core.dagger.AppScope
+import frangsierra.kotlinfirechat.core.flux.doAsync
 import frangsierra.kotlinfirechat.session.model.*
 import frangsierra.kotlinfirechat.session.store.CreateAccountCompleteAction
 import frangsierra.kotlinfirechat.session.store.LoginCompleteAction
@@ -76,108 +78,105 @@ class SessionControllerImpl @Inject constructor(private val authInstance: Fireba
                                                 private val dispatcher: Dispatcher) : SessionController {
     override fun tryToLoginInFirstInstance() {
         authInstance.addAuthStateListener { firebaseAuth ->
-            if (firebaseAuth.currentUser == null || !firebaseAuth.currentUser!!.isEmailVerified)
-                dispatcher.dispatchOnUi(LoginCompleteAction(task = taskFailure()))
-            else {
-                val currentUser = firebaseAuth.currentUser!!
-                dispatcher.dispatchOnUiSync(LoginCompleteAction(task = taskSuccess(),
-                    user = currentUser.toUser(),
-                    associatedProviders = currentUser.associatedProviders()))
+            doAsync {
+                if (firebaseAuth.currentUser == null || !firebaseAuth.currentUser!!.isEmailVerified)
+                    dispatcher.dispatchOnUi(LoginCompleteAction(task = taskFailure()))
+                else {
+                    val currentUser = firebaseAuth.currentUser!!
+                    dispatcher.dispatchOnUi(LoginCompleteAction(task = taskSuccess(),
+                            user = currentUser.toUser(),
+                            associatedProviders = currentUser.associatedProviders()))
+
+                }
             }
         }
     }
 
     override fun loginWithCredentials(email: String, password: String) {
-        authInstance.signInWithEmailAndPassword(email, password)
-            .addOnCompleteListener { task ->
-                if (task.isSuccessful) {
-                    val result = task.result
-                    val emailVerified = result.user.isEmailVerified
-                    val user = result.user.toUser()
-                    val providers = result.user.associatedProviders()
-                    dispatcher.dispatchOnUi(LoginCompleteAction(
+        doAsync {
+            try {
+                val result = Tasks.await(authInstance.signInWithEmailAndPassword(email, password))
+                val emailVerified = result.user.isEmailVerified
+                val user = result.user.toUser()
+                val providers = result.user.associatedProviders()
+                dispatcher.dispatchOnUi(LoginCompleteAction(
                         user = user,
                         emailVerified = emailVerified,
                         task = taskSuccess(),
                         associatedProviders = providers))
-                } else {
-                    dispatcher.dispatchOnUi(LoginCompleteAction(user = null, task = taskFailure(task.exception)))
-                }
+            } catch (e: Throwable) {
+                dispatcher.dispatchOnUi(LoginCompleteAction(user = null, task = taskFailure(e)))
             }
+        }
     }
 
     override fun createAccountWithCredentials(email: String, password: String, username: String) {
-        authInstance.createUserWithEmailAndPassword(email, password).addOnCompleteListener { task ->
-            if (task.isSuccessful) {
-                val firebaseUser = task.result.user
+        doAsync {
+            try {
+                val result = Tasks.await(authInstance.createUserWithEmailAndPassword(email, password))
+                val firebaseUser = result.user
                 val emailVerified = firebaseUser.isEmailVerified
-                val user = firebaseUser.toUser()
+                val user = firebaseUser.toUser().copy(username = username)
                 val providers = firebaseUser.associatedProviders()
                 dispatcher.dispatchOnUi(CreateAccountCompleteAction(
-                    user = user,
-                    emailVerified = emailVerified,
-                    task = taskSuccess(),
-                    associatedProviders = providers))
+                        user = user,
+                        emailVerified = emailVerified,
+                        task = taskSuccess(),
+                        associatedProviders = providers))
                 if (!emailVerified) sendVerificationEmailToUser(firebaseUser)
-            } else {
-                dispatcher.dispatchOnUi(CreateAccountCompleteAction(
-                    user = null,
-                    task = taskFailure(task.exception)))
+            } catch (e: Throwable) {
+                dispatcher.dispatchOnUi(LoginCompleteAction(user = null, task = taskFailure(e)))
             }
         }
     }
 
     override fun loginWithProviderCredentials(credential: AuthCredential, email: String) {
-        authInstance.fetchSignInMethodsForEmail(email).addOnCompleteListener { fetchTask ->
-            if (fetchTask.isSuccessful) {
-                val providerResult = fetchTask.result
-                val isNewAccount = providerResult.signInMethods!!.contains((credential.provider))
+        doAsync {
+            try {
+                val providerResults = Tasks.await(authInstance.fetchSignInMethodsForEmail(email))
+                val isNewAccount = providerResults.signInMethods!!.contains((credential.provider))
                 if (isNewAccount) {
-                    authInstance.signInWithCredential(credential).addOnCompleteListener { signInTask ->
-                        if (signInTask.isSuccessful) {
-                            val authResult = signInTask.result
-                            val emailVerified = authResult.user.isEmailVerified
-                            val user = authResult.user.toUser()
-                            val providers = authResult.user.associatedProviders()
-                            dispatcher.dispatchOnUi(LoginCompleteAction(
-                                user = user,
-                                emailVerified = emailVerified,
-                                task = taskSuccess(),
-                                associatedProviders = providers))
-                            if (!emailVerified) sendVerificationEmailToUser(authResult.user)
-                        } else dispatcher.dispatchOnUi(LoginCompleteAction(user = null, task = taskFailure(fetchTask.exception)))
-                    }
+                    val authResult = Tasks.await(authInstance.signInWithCredential(credential))
+                    val emailVerified = authResult.user.isEmailVerified
+                    val user = authResult.user.toUser()
+                    val providers = authResult.user.associatedProviders()
+                    dispatcher.dispatchOnUi(LoginCompleteAction(
+                            user = user,
+                            emailVerified = emailVerified,
+                            task = taskSuccess(),
+                            associatedProviders = providers))
+                    if (!emailVerified) sendVerificationEmailToUser(authResult.user)
                 } else {
                     dispatcher.dispatchOnUi(LoginCompleteAction(user = null, task = taskFailure(ProviderNotLinkedException(credential.provider))))
                 }
-            } else {
-                dispatcher.dispatchOnUi(LoginCompleteAction(user = null, task = taskFailure(fetchTask.exception)))
+            } catch (e: Throwable) {
+                dispatcher.dispatchOnUi(LoginCompleteAction(user = null, task = taskFailure(e)))
             }
         }
     }
 
     override fun createAccountWithProviderCredentials(credential: AuthCredential, userData: User) {
-        authInstance.fetchSignInMethodsForEmail(userData.email).addOnCompleteListener { fetchTask ->
-            if (fetchTask.isSuccessful) {
-                val providerResult = fetchTask.result
-                val isNewAccount = providerResult.signInMethods!!.contains((credential.provider))
-                authInstance.signInWithCredential(credential).addOnCompleteListener { signInTask ->
-                    if (signInTask.isSuccessful) {
-                        val authResult = signInTask.result
-                        val emailVerified = authResult.user.isEmailVerified
-                        val user = authResult.user.toUser().copy(photoUrl = userData.photoUrl)
-                        val providers = authResult.user.associatedProviders()
-                        dispatcher.dispatchOnUi(CreateAccountCompleteAction(
+        doAsync {
+            try {
+                val providerResults = Tasks.await(authInstance.fetchSignInMethodsForEmail(userData.email))
+                val isNewAccount = providerResults.signInMethods!!.contains((credential.provider))
+                if (isNewAccount) {
+                    val authResult = Tasks.await(authInstance.signInWithCredential(credential))
+                    val emailVerified = authResult.user.isEmailVerified
+                    val user = authResult.user.toUser().copy(photoUrl = userData.photoUrl)
+                    val providers = authResult.user.associatedProviders()
+                    dispatcher.dispatchOnUi(CreateAccountCompleteAction(
                             user = user,
                             alreadyExisted = !isNewAccount,
                             emailVerified = emailVerified,
                             task = taskSuccess(),
                             associatedProviders = providers))
-                        if (!emailVerified) sendVerificationEmailToUser(authResult.user)
-                    } else dispatcher.dispatchOnUi(CreateAccountCompleteAction(user = null, task = taskFailure(fetchTask.exception)))
+                    if (!emailVerified) sendVerificationEmailToUser(authResult.user)
+                } else {
+                    dispatcher.dispatchOnUi(CreateAccountCompleteAction(user = null, task = taskFailure(ProviderNotLinkedException(credential.provider))))
                 }
-            } else {
-                dispatcher.dispatchOnUi(CreateAccountCompleteAction(user = null, task = taskFailure(fetchTask.exception)))
+            } catch (e: Throwable) {
+                dispatcher.dispatchOnUi(CreateAccountCompleteAction(user = null, task = taskFailure(e)))
             }
         }
     }
@@ -197,29 +196,29 @@ class SessionControllerImpl @Inject constructor(private val authInstance: Fireba
     override fun verifyUser() {
         if (authInstance.currentUser == null) {
             dispatcher.dispatchOnUi(VerifyUserEmailCompleteAction(taskFailure(FirebaseUserNotFound()),
-                verified = false))
+                    verified = false))
             return
         }
 
         authInstance.currentUser!!.reload() //send a verification email needs to have a recent user instance. We need to reload it to avoid errors
-            .addOnCompleteListener { reloadTask ->
-                //After the reload the currentUser can be null because it takes some time in be updated
-                if (reloadTask.isSuccessful && authInstance.currentUser != null) {
-                    val user = authInstance.currentUser!!
-                    dispatcher.dispatchOnUi(VerifyUserEmailCompleteAction(task = taskSuccess(), verified = user.isEmailVerified))
-                } else dispatcher.dispatchOnUi(VerifyUserEmailCompleteAction(task = taskFailure(reloadTask.exception)))
-            }
+                .addOnCompleteListener { reloadTask ->
+                    //After the reload the currentUser can be null because it takes some time in be updated
+                    if (reloadTask.isSuccessful && authInstance.currentUser != null) {
+                        val user = authInstance.currentUser!!
+                        dispatcher.dispatchOnUi(VerifyUserEmailCompleteAction(task = taskSuccess(), verified = user.isEmailVerified))
+                    } else dispatcher.dispatchOnUi(VerifyUserEmailCompleteAction(task = taskFailure(reloadTask.exception)))
+                }
     }
 
     private fun sendVerificationEmailToUser(user: FirebaseUser) {
-        user.reload() //send a verification email needs to have a recent user instance. We need to reload it to avoid errors
-            .addOnCompleteListener { reloadTask ->
-                if (reloadTask.isSuccessful) {
-                    user.sendEmailVerification().addOnCompleteListener { emailTask ->
-                        if (emailTask.isSuccessful) dispatcher.dispatchOnUi(VerificationEmailSentAction(taskSuccess()))
-                        else dispatcher.dispatchOnUi(VerificationEmailSentAction(task = taskFailure(emailTask.exception)))
-                    }
-                } else dispatcher.dispatchOnUi(VerificationEmailSentAction(task = taskFailure(reloadTask.exception)))
+        doAsync {
+            try {
+                Tasks.await(user.reload())
+                Tasks.await(user.sendEmailVerification())
+                dispatcher.dispatchOnUi(VerificationEmailSentAction(taskSuccess()))
+            } catch (e: Throwable) {
+                dispatcher.dispatchOnUi(VerificationEmailSentAction(task = taskFailure(e)))
             }
+        }
     }
 }
