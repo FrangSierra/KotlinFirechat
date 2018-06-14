@@ -29,6 +29,7 @@ class FirebaseModule {
     @AppScope
     fun provideFirestore(): FirebaseFirestore = FirebaseFirestore.getInstance().apply {
         val settings = FirebaseFirestoreSettings.Builder()
+                .setTimestampsInSnapshotsEnabled(true)
                 .setPersistenceEnabled(true)
                 .build()
         firestoreSettings = settings

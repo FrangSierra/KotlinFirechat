@@ -1,5 +1,6 @@
 package frangsierra.kotlinfirechat.session
 
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import com.google.android.gms.auth.api.signin.GoogleSignIn
@@ -22,6 +23,11 @@ class LoginActivity : FluxActivity(), GoogleLoginCallback {
 
     @Inject
     lateinit var sessionStore: SessionStore
+
+    companion object {
+        fun newIntent(context: Context): Intent =
+                Intent(context, LoginActivity::class.java)
+    }
 
     override val googleApiClient: GoogleSignInOptions by lazy {
         GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)

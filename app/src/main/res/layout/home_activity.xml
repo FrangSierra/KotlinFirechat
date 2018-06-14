@@ -41,7 +41,6 @@
             android:layout_width="0dp" />
 
         <Button
-            android:enabled="false"
             android:id="@+id/sendButton"
             android:layout_gravity="bottom"
             android:layout_height="wrap_content"

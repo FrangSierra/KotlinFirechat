@@ -1,0 +1,56 @@
+package frangsierra.kotlinfirechat.profile.controller
+
+import com.google.android.gms.tasks.Tasks
+import com.google.firebase.firestore.FirebaseFirestore
+import frangsierra.kotlinfirechat.core.dagger.AppScope
+import frangsierra.kotlinfirechat.core.firebase.*
+import frangsierra.kotlinfirechat.core.flux.doAsync
+import frangsierra.kotlinfirechat.profile.model.PrivateData
+import frangsierra.kotlinfirechat.profile.model.PublicProfile
+import frangsierra.kotlinfirechat.profile.model.UserData
+import frangsierra.kotlinfirechat.profile.store.LoadUserDataCompleteAction
+import frangsierra.kotlinfirechat.session.model.User
+import frangsierra.kotlinfirechat.util.taskFailure
+import frangsierra.kotlinfirechat.util.taskSuccess
+import mini.Dispatcher
+import javax.inject.Inject
+
+interface ProfileController {
+    fun loadUserProfile(user: User)
+}
+
+@AppScope
+class ProfileControllerImpl @Inject constructor(private val firestore: FirebaseFirestore, val dispatcher: Dispatcher) : ProfileController {
+    override fun loadUserProfile(user: User) {
+        doAsync {
+            try {
+                val privateData = getAndCreateIfNoyExistsPrivateData(user)
+                val publicProfile = getAndCreateIfNotExistsPublicData(user)
+                dispatcher.dispatchOnUi(LoadUserDataCompleteAction(privateData, publicProfile, taskSuccess()))
+            } catch (e: Throwable) {
+                dispatcher.dispatchOnUi(LoadUserDataCompleteAction(null, null, taskFailure(e)))
+            }
+        }
+    }
+
+    private fun getAndCreateIfNoyExistsPrivateData(user: User): PrivateData {
+        val privateDataDocument = Tasks.await(firestore.privateDataDoc(user.uid).get())
+        return if (privateDataDocument.exists()) privateDataDocument.toPrivateData()
+        else {
+            val firebasePrivateData = FirebasePrivateData(user.email)
+            Tasks.await(firestore.privateDataDoc(user.uid).set(firebasePrivateData))
+            firebasePrivateData.toPrivateData(user.uid)
+        }
+    }
+
+    private fun getAndCreateIfNotExistsPublicData(user: User): PublicProfile {
+        val userData = UserData(user.username, user.photoUrl, user.uid)
+        val publicProfile = Tasks.await(firestore.publicProfileDoc(userData.uid).get())
+        return if (publicProfile.exists()) publicProfile.toPublicProfile()
+        else {
+            val firebasePublicProfile = FirebasePublicProfile(userData.toFirebaseUserData(), userData.username.toLowerCase())
+            Tasks.await(firestore.publicProfileDoc(userData.uid).set(firebasePublicProfile))
+            firebasePublicProfile.toPublicProfile()
+        }
+    }
+}

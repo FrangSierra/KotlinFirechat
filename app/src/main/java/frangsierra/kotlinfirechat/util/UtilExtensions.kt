@@ -9,6 +9,8 @@ import android.provider.MediaStore
 import android.support.design.widget.TextInputLayout
 import android.support.v4.content.FileProvider
 import android.support.v7.app.AlertDialog
+import android.support.v7.widget.LinearLayoutManager
+import android.support.v7.widget.RecyclerView
 import android.widget.Toast
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
 import com.google.firebase.auth.FirebaseAuthInvalidUserException
@@ -16,6 +18,8 @@ import com.google.firebase.auth.FirebaseAuthUserCollisionException
 import com.google.firebase.auth.FirebaseAuthWeakPasswordException
 import frangsierra.kotlinfirechat.R
 import java.io.File
+import java.util.*
+import java.util.concurrent.TimeUnit
 
 const val TC_REQUEST_GALLERY: Int = 101
 const val TC_REQUEST_CAMERA: Int = 102
@@ -46,6 +50,12 @@ fun Throwable.tryToGetLoginMessage(): Int {
     }
 }
 
+fun RecyclerView.setLinearLayoutManager(context: Context, reverseLayout: Boolean = true, stackFromEnd: Boolean = true) {
+    val linearLayoutManager = LinearLayoutManager(context)
+    linearLayoutManager.reverseLayout = reverseLayout
+    linearLayoutManager.stackFromEnd = stackFromEnd
+    layoutManager = linearLayoutManager
+}
 
 fun Activity.showImageIntentDialog(outputFileUri: Uri) {
     val builder: AlertDialog.Builder = AlertDialog.Builder(this)
@@ -77,6 +87,22 @@ fun Activity.showImageIntentDialog(outputFileUri: Uri) {
     builder.show()
 }
 
+fun Long.getTimeAgoText(): String {
+    val differenceTimeStamp = System.currentTimeMillis() - this
+    val days = TimeUnit.MILLISECONDS.toDays(differenceTimeStamp)
+    val hours = TimeUnit.MILLISECONDS.toHours(differenceTimeStamp)
+    val minutes = TimeUnit.MILLISECONDS.toMinutes(differenceTimeStamp)
+    val formatString = "%d %s"
+    return when {
+        days.div(375) > 0 -> formatString.format(Locale.getDefault(), days.div(375), "y")
+        days.div(30) > 0 -> formatString.format(Locale.getDefault(), days.div(30), "mon")
+        days.div(7) > 0 -> formatString.format(Locale.getDefault(), days.div(7), "wk")
+        days > 0 -> formatString.format(days, "d")
+        hours > 0 -> formatString.format(hours, "h")
+        minutes > 0 -> formatString.format(minutes, "min")
+        else -> formatString.format(Locale.getDefault(), TimeUnit.MILLISECONDS.toSeconds(differenceTimeStamp).plus(1), "s")
+    }
+}
 
 fun Context.generateUniqueFireUri(): Uri {
     // Determine Uri of camera image to save.

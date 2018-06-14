@@ -6,10 +6,12 @@ import dagger.Component
 import dagger.Module
 import dagger.Provides
 import frangsierra.kotlinfirechat.chat.store.ChatModule
+import frangsierra.kotlinfirechat.core.SplashActivity
 import frangsierra.kotlinfirechat.core.firebase.FirebaseModule
 import frangsierra.kotlinfirechat.core.flux.App
 import frangsierra.kotlinfirechat.core.flux.FluxActivity
 import frangsierra.kotlinfirechat.home.HomeActivity
+import frangsierra.kotlinfirechat.profile.store.ProfileModule
 import frangsierra.kotlinfirechat.session.CreateAccountActivity
 import frangsierra.kotlinfirechat.session.EmailVerificationActivity
 import frangsierra.kotlinfirechat.session.LoginActivity
@@ -26,9 +28,11 @@ interface AppComponent {
 @Component(modules = [(AppModule::class),
     (FirebaseModule::class),
     (ChatModule::class),
+    (ProfileModule::class),
     (SessionModule::class)])
 
 interface DefaultAppComponent : AppComponent {
+    fun inject(target: SplashActivity)
     fun inject(target: FluxActivity)
     fun inject(target: LoginActivity)
     fun inject(target: CreateAccountActivity)

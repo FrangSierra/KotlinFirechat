@@ -7,6 +7,7 @@ import dagger.multibindings.IntoMap
 import frangsierra.kotlinfirechat.chat.controller.ChatController
 import frangsierra.kotlinfirechat.chat.controller.ChatControllerImpl
 import frangsierra.kotlinfirechat.core.dagger.AppScope
+import frangsierra.kotlinfirechat.profile.store.ProfileStore
 import frangsierra.kotlinfirechat.session.store.SignOutAction
 import frangsierra.kotlinfirechat.util.taskRunning
 import io.reactivex.disposables.CompositeDisposable
@@ -15,7 +16,7 @@ import mini.Store
 import javax.inject.Inject
 
 @AppScope
-class ChatStore @Inject constructor(val controller: ChatController) : Store<ChatState>() {
+class ChatStore @Inject constructor(val controller: ChatController, val profileStore: ProfileStore) : Store<ChatState>() {
 
     @Reducer
     fun loadMessages(action: StartListeningChatMessagesAction, state: ChatState): ChatState {
@@ -25,18 +26,20 @@ class ChatStore @Inject constructor(val controller: ChatController) : Store<Chat
 
     @Reducer
     fun messagesReceived(action: MessagesLoadedAction, state: ChatState): ChatState {
-        return state.copy(messages = state.messages.plus(action.messages).distinctBy { it.uid })
+        return state.copy(messages = state.messages.plus(action.messages.map { it.uid to it }.toMap()))
     }
 
     @Reducer
     fun sendMessage(action: SendMessageAction, state: ChatState): ChatState {
-        controller.sendMessage(action.message)
+        controller.sendMessage(action.message, profileStore.state.publicProfile!!.userData)
         return state.copy(sendMessageTask = taskRunning())
     }
 
     @Reducer
     fun messageSent(action: SendMessageCompleteAction, state: ChatState): ChatState {
-        return state.copy(sendMessageTask = action.task, messages = if (action.task.isSuccessful()) state.messages.plus(action.message!!) else state.messages)
+        return state.copy(sendMessageTask = action.task,
+                messages = if (action.task.isSuccessful()) state.messages
+                        .plus(action.message!!.uid to action.message) else state.messages)
     }
 
     @Reducer
