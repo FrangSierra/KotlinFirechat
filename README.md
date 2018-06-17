@@ -1,8 +1,22 @@
 # KotlinFirechat
-This project is a basic chat application using Flux Architecture together with [Rx Java 2.0](https://github.com/ReactiveX/RxJava/tree/2.x), [Dagger2](https://google.github.io/dagger/) and [RxFirebase2](https://github.com/FrangSierra/Rx2Firebase).
+This project is a basic chat application using Flux Architecture together with [Rx Java 2.0](https://github.com/ReactiveX/RxJava/tree/2.x) and [Dagger2](https://google.github.io/dagger/).
 
-All the Firebase login/creation acccounts logic is inside *SessionController* meanwhile the chat management is in the *ChatController*. Both are used by their respectives Store to change their respective states, using the real implementation or a fake one with testing purposes. In the other hand, the activities will be listening the changes of the stores to update themselves with the new data.
+## Firebase Android Series
+The repository works as a sample for Firebase Android Series. A series of articles published on medium that shows how to build an Android application with Kotlin and Firebase from scratch. Each chapter of the series comes together with a branch of this repository:
+* [Introduction](https://proandroiddev.com/firebase-android-series-learning-firebase-from-zero-to-hero-3bacbdf8e048) 
+* [Firebase Authentication](https://proandroiddev.com/firebase-android-series-authentication-74f209c59738) -> [Sample](https://github.com/FrangSierra/KotlinFirechat/tree/01-Auth)
+* **Firebase Firestore** -> Coming soon
+* **Crashlytics** -> Coming soon
+* **Firebase Test Lab** -> Coming soon
+* **Firebase Storage** -> Coming soon
+* **Firebase Cloud Functions** -> Coming soon
+* **Firebase Cloud Messaging** -> Coming soon
+* **Firebase Dynamic Links** -> Coming soon
+* **Firebase Performance** -> Coming soon
+* **Firebase Analytics** -> Coming soon
 
+
+##Flux Architecure
 Flux is an Architecture which works pretty well with Firebase(It does aswell with Redux), it allows you to keep all the data in cache in a really easy mode, together with data persistence of Firebase it becomes a really strongh way of develop applications.
 
 ![alt tag](https://raw.githubusercontent.com/lgvalle/lgvalle.github.io/master/public/images/flux-graph-complete.png)
