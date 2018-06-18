@@ -5,7 +5,7 @@ This project is a basic chat application using Flux Architecture together with [
 The repository works as a sample for Firebase Android Series. A series of articles published on medium that shows how to build an Android application with Kotlin and Firebase from scratch. Each chapter of the series comes together with a branch of this repository:
 * [Introduction](https://proandroiddev.com/firebase-android-series-learning-firebase-from-zero-to-hero-3bacbdf8e048) 
 * [Firebase Authentication](https://proandroiddev.com/firebase-android-series-authentication-74f209c59738) -> [Sample](https://github.com/FrangSierra/KotlinFirechat/tree/01-Auth)
-* **Firebase Firestore** -> Coming soon
+* [Firebase Firestore](https://proandroiddev.com/firebase-android-series-firestore-17e8951c574e) -> [Sample](https://github.com/FrangSierra/KotlinFirechat/tree/02-Database)
 * **Crashlytics** -> Coming soon
 * **Firebase Test Lab** -> Coming soon
 * **Firebase Storage** -> Coming soon
@@ -16,7 +16,7 @@ The repository works as a sample for Firebase Android Series. A series of articl
 * **Firebase Analytics** -> Coming soon
 
 
-##Flux Architecure
+## Flux Architecure
 Flux is an Architecture which works pretty well with Firebase(It does aswell with Redux), it allows you to keep all the data in cache in a really easy mode, together with data persistence of Firebase it becomes a really strongh way of develop applications.
 
 ![alt tag](https://raw.githubusercontent.com/lgvalle/lgvalle.github.io/master/public/images/flux-graph-complete.png)
