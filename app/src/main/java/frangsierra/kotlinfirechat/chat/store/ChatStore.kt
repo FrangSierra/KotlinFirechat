@@ -19,37 +19,37 @@ import javax.inject.Inject
 class ChatStore @Inject constructor(val controller: ChatController, val profileStore: ProfileStore) : Store<ChatState>() {
 
     @Reducer
-    fun loadMessages(action: StartListeningChatMessagesAction, state: ChatState): ChatState {
+    fun loadMessages(action: StartListeningChatMessagesAction): ChatState {
         controller.startListeningMessages()
         return state
     }
 
     @Reducer
-    fun messagesReceived(action: MessagesLoadedAction, state: ChatState): ChatState {
+    fun messagesReceived(action: MessagesLoadedAction): ChatState {
         return state.copy(messages = state.messages.plus(action.messages.map { it.uid to it }.toMap()))
     }
 
     @Reducer
-    fun sendMessage(action: SendMessageAction, state: ChatState): ChatState {
+    fun sendMessage(action: SendMessageAction): ChatState {
         controller.sendMessage(action.message, profileStore.state.publicProfile!!)
         return state.copy(sendMessageTask = taskRunning())
     }
 
     @Reducer
-    fun messageSent(action: SendMessageCompleteAction, state: ChatState): ChatState {
+    fun messageSent(action: SendMessageCompleteAction): ChatState {
         return state.copy(sendMessageTask = action.task,
                 messages = if (action.task.isSuccessful()) state.messages
                         .plus(action.message!!.uid to action.message) else state.messages)
     }
 
     @Reducer
-    fun stopListeningMessages(action: StopListeningChatMessagesAction, state: ChatState): ChatState {
+    fun stopListeningMessages(action: StopListeningChatMessagesAction): ChatState {
         state.disposables.dispose()
         return state.copy(disposables = CompositeDisposable())
     }
 
     @Reducer
-    fun signOut(action: SignOutAction, state: ChatState): ChatState {
+    fun signOut(action: SignOutAction): ChatState {
         return initialState()
     }
 }

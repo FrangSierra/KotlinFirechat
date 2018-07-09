@@ -9,6 +9,7 @@ import com.google.android.gms.common.api.ApiException
 import com.google.firebase.auth.AuthCredential
 import frangsierra.kotlinfirechat.home.HomeActivity
 import frangsierra.kotlinfirechat.R
+import frangsierra.kotlinfirechat.core.errors.ErrorHandler
 import frangsierra.kotlinfirechat.core.flux.FluxActivity
 import frangsierra.kotlinfirechat.session.store.CreateAccountWithCredentialsAction
 import frangsierra.kotlinfirechat.session.store.CreateAccountWithProviderCredentialsAction
@@ -21,6 +22,8 @@ class CreateAccountActivity : FluxActivity(), GoogleLoginCallback {
 
     @Inject
     lateinit var sessionStore: SessionStore
+    @Inject
+    lateinit var errorHandler: ErrorHandler
 
     override val googleApiClient: GoogleSignInOptions by lazy {
         GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
@@ -53,7 +56,9 @@ class CreateAccountActivity : FluxActivity(), GoogleLoginCallback {
                 if (it.createAccountTask.isSuccessful() && it.loggedUser != null) {
                     if (it.verified) goToHome() else goToVerificationEmailScreen()
                 } else if (it.createAccountTask.isFailure()) {
-                    it.createAccountTask.error!!.message?.let { toast(it) }
+                    it.createAccountTask.error?.let {
+                        toast(errorHandler.getMessageForError(it))
+                    }
                 }
                 dismissProgressDialog()
             }.track()
@@ -69,7 +74,9 @@ class CreateAccountActivity : FluxActivity(), GoogleLoginCallback {
                 if (it.createAccountTask.isSuccessful() && it.loggedUser != null) {
                     if (it.verified) goToHome() else goToVerificationEmailScreen()
                 } else if (it.createAccountTask.isFailure()) {
-                    it.createAccountTask.error!!.message?.let { toast(it) }
+                    it.createAccountTask.error?.let {
+                        toast(errorHandler.getMessageForError(it))
+                    }
                 }
                 dismissProgressDialog()
             }.track()

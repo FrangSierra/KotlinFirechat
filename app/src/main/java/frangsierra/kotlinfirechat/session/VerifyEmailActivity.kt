@@ -5,6 +5,7 @@ import android.content.Intent
 import android.os.Bundle
 import frangsierra.kotlinfirechat.home.HomeActivity
 import frangsierra.kotlinfirechat.R
+import frangsierra.kotlinfirechat.core.errors.ErrorHandler
 import frangsierra.kotlinfirechat.core.flux.FluxActivity
 import frangsierra.kotlinfirechat.session.store.SendVerificationEmailAction
 import frangsierra.kotlinfirechat.session.store.SessionStore
@@ -21,6 +22,9 @@ class EmailVerificationActivity : FluxActivity() {
 
     @Inject
     lateinit var sessionStore: SessionStore
+
+    @Inject
+    lateinit var errorHandler: ErrorHandler
 
     private lateinit var verificationEmail: String
 
@@ -76,7 +80,9 @@ class EmailVerificationActivity : FluxActivity() {
                 if (it.verificationEmailTask.isSuccessful()) {
                     toast("We have sent a verification email to your address")
                 } else {
-                    it.verificationEmailTask.error!!.message?.let { toast(it) }
+                    it.verificationEmailTask.error?.let {
+                        toast(errorHandler.getMessageForError(it))
+                    }
                 }
                 dismissProgressDialog()
             }.track()

@@ -7,6 +7,7 @@ import dagger.Module
 import dagger.Provides
 import frangsierra.kotlinfirechat.chat.store.ChatModule
 import frangsierra.kotlinfirechat.core.SplashActivity
+import frangsierra.kotlinfirechat.core.errors.ErrorHandlingModule
 import frangsierra.kotlinfirechat.core.firebase.FirebaseModule
 import frangsierra.kotlinfirechat.core.flux.App
 import frangsierra.kotlinfirechat.core.flux.FluxActivity
@@ -28,6 +29,7 @@ interface AppComponent {
 @Component(modules = [(AppModule::class),
     (FirebaseModule::class),
     (ChatModule::class),
+    (ErrorHandlingModule::class),
     (ProfileModule::class),
     (SessionModule::class)])
 

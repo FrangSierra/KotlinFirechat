@@ -12,6 +12,10 @@
     <string name="error_invalid_account">There is no user record corresponding to this identifier.</string>
     <string name="error_invalid_password">The password is invalid or the user does not have a password</string>
     <string name="error_weak_password">Use another password, last one was so weak</string>
+    <string name="error_unexpected">Server found an unexpected error, try again later.</string>
+    <string name="error_google">Error retrieving data from Google</string>
+    <string name="error_no_connection">Looks like you don\'t have internet connection, try again later.</string>
+    <string name="error_invalid_certificate">Your connection is not secure, try again later.</string>
     <string name="error_invalid_email">Invalid email</string>
     <string name="error_email_already_exist">An user with this email already exist</string>
     <string name="error_unknown">Unknown error, please, try again</string>

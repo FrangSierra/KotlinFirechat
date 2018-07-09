@@ -1,17 +1,15 @@
 package frangsierra.kotlinfirechat.core.flux
 
 import android.app.Application
+import com.crashlytics.android.Crashlytics
 import frangsierra.kotlinfirechat.BuildConfig
 import frangsierra.kotlinfirechat.core.dagger.AppComponent
-import frangsierra.kotlinfirechat.core.dagger.AppModule
-import frangsierra.kotlinfirechat.core.dagger.DaggerDefaultAppComponent
+import frangsierra.kotlinfirechat.core.errors.CrashlyticsHandler
 import frangsierra.kotlinfirechat.util.Prefs
-import mini.DebugTree
-import mini.Grove
-import mini.MiniActionReducer
-import mini.log.LoggerInterceptor
+import io.fabric.sdk.android.Fabric
 import org.jetbrains.annotations.TestOnly
 import kotlin.properties.Delegates
+
 
 private var _app: App? = null
 
@@ -29,20 +27,15 @@ fun setAppComponent(component: AppComponent) {
 class App : Application() {
     override fun onCreate() {
         super.onCreate()
-        _app = this
-        _prefs = Prefs(this)
 
-        if (BuildConfig.DEBUG) Grove.plant(DebugTree(true))
-
-
-        if (_appComponent == null) {
-            _appComponent = DaggerDefaultAppComponent
-                .builder()
-                .appModule(AppModule(this))
+        //Initialize Fabric before add the custom UncaughtExceptionHandler!
+        val fabric = Fabric.Builder(this)
+                .kits(Crashlytics())
+                .debuggable(BuildConfig.DEBUG) // Enables Crashlytics debugger
                 .build()
-            _appComponent!!.dispatcher().actionReducer = MiniActionReducer(stores = _appComponent!!.stores())
-            _appComponent!!.dispatcher().addInterceptor(CustomLoggerInterceptor
-            (_appComponent!!.stores().values))
-        }
+        Fabric.with(fabric)
+
+        val defaultUncaughtExceptionHandler = Thread.getDefaultUncaughtExceptionHandler()
+        Thread.setDefaultUncaughtExceptionHandler(CrashlyticsHandler(defaultUncaughtExceptionHandler))
     }
 }

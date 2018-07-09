@@ -36,20 +36,6 @@ fun TextInputLayout.onError(errorText: String? = null, enable: Boolean = true) {
     error = errorText
 }
 
-fun Throwable.tryToGetLoginMessage(): Int {
-    if (this is FirebaseAuthWeakPasswordException) {
-        return R.string.error_weak_password
-    } else if (this is FirebaseAuthInvalidCredentialsException) {
-        return R.string.error_invalid_password
-    } else if (this is FirebaseAuthUserCollisionException) {
-        return R.string.error_email_already_exist
-    } else if (this is FirebaseAuthInvalidUserException) {
-        return R.string.error_invalid_account
-    } else {
-        return R.string.error_unknown
-    }
-}
-
 fun RecyclerView.setLinearLayoutManager(context: Context, reverseLayout: Boolean = true, stackFromEnd: Boolean = true) {
     val linearLayoutManager = LinearLayoutManager(context)
     linearLayoutManager.reverseLayout = reverseLayout
@@ -60,7 +46,7 @@ fun RecyclerView.setLinearLayoutManager(context: Context, reverseLayout: Boolean
 fun Activity.showImageIntentDialog(outputFileUri: Uri) {
     val builder: AlertDialog.Builder = AlertDialog.Builder(this)
     builder.setTitle(getString(R.string.choose_image_picker_text))
-    builder.setItems(arrayOf(getString(R.string.gallery_text), getString(R.string.camera_text)), { _, which ->
+    builder.setItems(arrayOf(getString(R.string.gallery_text), getString(R.string.camera_text))) { _, which ->
         when (which) {
             0 -> {
                 // GET IMAGE FROM THE GALLERY
@@ -83,7 +69,7 @@ fun Activity.showImageIntentDialog(outputFileUri: Uri) {
                 startActivityForResult(getCameraImage, TC_REQUEST_CAMERA)
             }
         }
-    })
+    }
     builder.show()
 }
 
@@ -107,7 +93,7 @@ fun Long.getTimeAgoText(): String {
 fun Context.generateUniqueFireUri(): Uri {
     // Determine Uri of camera image to save.
     //todo change name to new app
-    val root = File(Environment.getExternalStorageDirectory().toString() + File.separator + "GrizzlyGrit" + File.separator)
+    val root = File(Environment.getExternalStorageDirectory().toString() + File.separator + "KotlinFirechat" + File.separator)
     root.mkdirs()
     val fileName = "${System.currentTimeMillis()}$JPG"
     val sdImageMainDirectory = File(root, fileName)

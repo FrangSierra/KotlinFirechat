@@ -46,6 +46,8 @@
                 android:resource="@xml/provider_paths" />
         </provider>
 
+        <!--Disable automatic initialization to enable debug mode and initialization on demand-->
+        <meta-data android:name="firebase_crashlytics_collection_enabled" android:value="false" />
     </application>
 
 </manifest>

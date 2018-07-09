@@ -8,6 +8,7 @@ import frangsierra.kotlinfirechat.chat.store.ChatStore
 import frangsierra.kotlinfirechat.chat.store.SendMessageAction
 import frangsierra.kotlinfirechat.chat.store.StartListeningChatMessagesAction
 import frangsierra.kotlinfirechat.chat.store.StopListeningChatMessagesAction
+import frangsierra.kotlinfirechat.core.errors.ErrorHandler
 import frangsierra.kotlinfirechat.core.flux.FluxActivity
 import frangsierra.kotlinfirechat.profile.store.ProfileStore
 import frangsierra.kotlinfirechat.session.LoginActivity
@@ -21,6 +22,8 @@ class HomeActivity : FluxActivity() {
     lateinit var profileStore: ProfileStore
     @Inject
     lateinit var chatStore: ChatStore
+    @Inject
+    lateinit var errorHandler: ErrorHandler
 
     companion object {
         fun newIntent(context: Context): Intent =
@@ -72,6 +75,7 @@ class HomeActivity : FluxActivity() {
                 .filterOne { it.sendMessageTask.isTerminal() } //Wait for request to finish
                 .subscribe {
                     if (it.sendMessageTask.isFailure()) {
+                        errorHandler.handle(it.sendMessageTask.error)
                         toast("There was an error sending your message")
                     }
                     sendButton.isEnabled = true
