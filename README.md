@@ -6,7 +6,7 @@ The repository works as a sample for Firebase Android Series. A series of articl
 * [Introduction](https://proandroiddev.com/firebase-android-series-learning-firebase-from-zero-to-hero-3bacbdf8e048) 
 * [Firebase Authentication](https://proandroiddev.com/firebase-android-series-authentication-74f209c59738) -> [Sample](https://github.com/FrangSierra/KotlinFirechat/tree/01-Auth)
 * [Firebase Firestore](https://proandroiddev.com/firebase-android-series-firestore-17e8951c574e) -> [Sample](https://github.com/FrangSierra/KotlinFirechat/tree/02-Database)
-* **Crashlytics** -> Coming soon
+* [Crashlytics](https://proandroiddev.com/firebase-android-series-crashlytics-29de3f507d6) -> [Sample](https://github.com/FrangSierra/KotlinFirechat/tree/03-Crashlytics)
 * **Firebase Test Lab** -> Coming soon
 * **Firebase Storage** -> Coming soon
 * **Firebase Cloud Functions** -> Coming soon
