@@ -7,4 +7,5 @@ import java.util.*
 data class Message(val uid: String = "",
                    val author: UserData,
                    val message: String,
+                   val attachedImageUrl: String?,
                    @ServerTimestamp val timestamp: Date)

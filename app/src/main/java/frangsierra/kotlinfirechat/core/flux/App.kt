@@ -4,9 +4,12 @@ import android.app.Application
 import com.crashlytics.android.Crashlytics
 import frangsierra.kotlinfirechat.BuildConfig
 import frangsierra.kotlinfirechat.core.dagger.AppComponent
+import frangsierra.kotlinfirechat.core.dagger.AppModule
+import frangsierra.kotlinfirechat.core.dagger.DaggerDefaultAppComponent
 import frangsierra.kotlinfirechat.core.errors.CrashlyticsHandler
 import frangsierra.kotlinfirechat.util.Prefs
 import io.fabric.sdk.android.Fabric
+import mini.MiniActionReducer
 import org.jetbrains.annotations.TestOnly
 import kotlin.properties.Delegates
 
@@ -27,6 +30,8 @@ fun setAppComponent(component: AppComponent) {
 class App : Application() {
     override fun onCreate() {
         super.onCreate()
+        _app = this
+        _prefs = Prefs(this)
 
         //Initialize Fabric before add the custom UncaughtExceptionHandler!
         val fabric = Fabric.Builder(this)
@@ -37,5 +42,16 @@ class App : Application() {
 
         val defaultUncaughtExceptionHandler = Thread.getDefaultUncaughtExceptionHandler()
         Thread.setDefaultUncaughtExceptionHandler(CrashlyticsHandler(defaultUncaughtExceptionHandler))
+
+        if (_appComponent == null) {
+            _appComponent = DaggerDefaultAppComponent
+                    .builder()
+                    .appModule(AppModule(this))
+                    .build()
+            _appComponent!!.dispatcher().actionReducers.add(MiniActionReducer(stores = _appComponent!!.stores()))
+            _appComponent!!.dispatcher().addInterceptor(CustomLoggerInterceptor
+            (_appComponent!!.stores().values))
+        }
+
     }
 }

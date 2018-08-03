@@ -9,8 +9,8 @@ import android.widget.ImageView
 import android.widget.TextView
 import frangsierra.kotlinfirechat.R
 import frangsierra.kotlinfirechat.chat.model.Message
-import frangsierra.kotlinfirechat.util.getTimeAgoText
 import frangsierra.kotlinfirechat.util.setCircularImage
+import frangsierra.kotlinfirechat.util.setImage
 import kotlinx.android.synthetic.main.item_message.view.*
 
 class MessageAdapter : RecyclerView.Adapter<MessageAdapter.MessageViewHolder>() {
@@ -27,6 +27,13 @@ class MessageAdapter : RecyclerView.Adapter<MessageAdapter.MessageViewHolder>() 
                 holder.photoImageView.setCircularImage(author.photoUrl)
                 holder.photoImageView.visibility = View.VISIBLE
             }
+            if (attachedImageUrl == null) {
+                holder.messagePhoto.visibility = View.GONE
+            } else {
+                holder.messagePhoto.setImage(attachedImageUrl)
+                holder.messagePhoto.visibility = View.VISIBLE
+            }
+
         }
     }
 
@@ -48,6 +55,7 @@ class MessageAdapter : RecyclerView.Adapter<MessageAdapter.MessageViewHolder>() 
 
     inner class MessageViewHolder(v: android.view.View) : RecyclerView.ViewHolder(v) {
         val photoImageView: ImageView = v.comment_author_picture
+        val messagePhoto: ImageView = v.comment_picture
         val messageTextView: TextView = v.comment_description
         val authorTextView: TextView = v.comment_author_username
         val timeAgoTextView: TextView = v.comment_time_ago

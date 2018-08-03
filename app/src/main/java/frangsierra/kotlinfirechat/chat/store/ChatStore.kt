@@ -31,7 +31,7 @@ class ChatStore @Inject constructor(val controller: ChatController, val profileS
 
     @Reducer
     fun sendMessage(action: SendMessageAction): ChatState {
-        controller.sendMessage(action.message, profileStore.state.publicProfile!!)
+        controller.sendMessage(action.message, action.attachedImageUri, profileStore.state.publicProfile!!)
         return state.copy(sendMessageTask = taskRunning())
     }
 

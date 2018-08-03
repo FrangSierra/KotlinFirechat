@@ -1,10 +1,14 @@
 package frangsierra.kotlinfirechat.core.firebase
 
+import android.content.Context
+import com.firebase.jobdispatcher.FirebaseJobDispatcher
+import com.firebase.jobdispatcher.GooglePlayDriver
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.FirebaseFirestoreSettings
 import com.google.firebase.iid.FirebaseInstanceId
+import com.google.firebase.storage.FirebaseStorage
 import dagger.Module
 import dagger.Provides
 import frangsierra.kotlinfirechat.core.dagger.AppScope
@@ -27,6 +31,10 @@ class FirebaseModule {
 
     @Provides
     @AppScope
+    fun provideStorage(): FirebaseStorage = FirebaseStorage.getInstance()
+
+    @Provides
+    @AppScope
     fun provideFirestore(): FirebaseFirestore = FirebaseFirestore.getInstance().apply {
         val settings = FirebaseFirestoreSettings.Builder()
                 .setTimestampsInSnapshotsEnabled(true)
@@ -34,4 +42,7 @@ class FirebaseModule {
                 .build()
         firestoreSettings = settings
     }
+
+    @Provides @AppScope
+    fun provideFirebaseDispatcher(context: Context): FirebaseJobDispatcher = FirebaseJobDispatcher(GooglePlayDriver(context))
 }
