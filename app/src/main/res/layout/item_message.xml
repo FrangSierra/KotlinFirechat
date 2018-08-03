@@ -24,7 +24,7 @@
         android:layout_marginStart="8dp"
         android:textSize="16sp"
         app:layout_constraintBottom_toTopOf="@+id/comment_description"
-        app:layout_constraintEnd_toStartOf="@id/comment_time_ago"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintHorizontal_chainStyle="spread_inside"
         app:layout_constraintStart_toEndOf="@+id/comment_author_picture"
@@ -43,10 +43,21 @@
         app:layout_constraintStart_toEndOf="@id/comment_author_username"
         tools:text="4d" />
 
+    <ImageView
+        android:id="@+id/comment_picture"
+        android:layout_width="120dp"
+        android:layout_height="120dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginTop="8dp"
+        app:layout_constraintBottom_toTopOf="@id/comment_description"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/comment_author_username" />
+
     <TextView
         android:id="@+id/comment_description"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_marginEnd="16dp"
         android:padding="8dp"
         android:textSize="14sp"
         app:layout_constraintBottom_toBottomOf="parent"

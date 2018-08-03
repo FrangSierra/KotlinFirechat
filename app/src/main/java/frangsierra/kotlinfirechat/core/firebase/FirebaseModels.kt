@@ -19,6 +19,7 @@ fun FirebaseUserData.toUserData() = UserData(username = username, photoUrl = pho
 
 data class FirebaseMessage(val author: FirebaseUserData = FirebaseUserData(),
                            val message: String = "",
+                           val attachedImageUrl : String? = null,
                            @ServerTimestamp val timestamp: Timestamp? = null)
 
 fun DocumentSnapshot.toMessage() = toObject(FirebaseMessage::class.java)!!.toMessage(id)
@@ -26,6 +27,7 @@ fun DocumentSnapshot.toMessage() = toObject(FirebaseMessage::class.java)!!.toMes
 fun FirebaseMessage.toMessage(id: String) = Message(uid = id,
         author = author.toUserData(),
         message = message,
+        attachedImageUrl = attachedImageUrl,
         timestamp = timestamp?.toDate() ?: Timestamp.now().toDate())
 
 data class FirebasePrivateData(

@@ -1,8 +1,14 @@
 package frangsierra.kotlinfirechat.home
 
+import android.Manifest
+import android.app.Activity
 import android.content.Context
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
+import android.support.v4.content.ContextCompat
+import com.crashlytics.android.Crashlytics
+import com.tbruyelle.rxpermissions2.RxPermissions
 import frangsierra.kotlinfirechat.R
 import frangsierra.kotlinfirechat.chat.store.ChatStore
 import frangsierra.kotlinfirechat.chat.store.SendMessageAction
@@ -31,6 +37,9 @@ class HomeActivity : FluxActivity() {
     }
 
     private val messageAdapter = MessageAdapter()
+    private var outputFileUri: Uri? = null
+    //FIXME inject me if it's used somewhere else
+    private val rxPermissionInstance: RxPermissions by lazy { RxPermissions(this) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -43,6 +52,7 @@ class HomeActivity : FluxActivity() {
         messageRecycler.setLinearLayoutManager(this, reverseLayout = false, stackFromEnd = false)
         messageRecycler.adapter = messageAdapter
         sendButton.setOnClickListener { sendMessage() }
+        photoPickerButton.setOnClickListener { requestPermissionsAndPickImage() }
     }
 
     private fun startListeningStoreChanges() {
@@ -69,7 +79,7 @@ class HomeActivity : FluxActivity() {
             return
         }
         sendButton.isEnabled = false
-        dispatcher.dispatchOnUi(SendMessageAction(messageEditText.text.toString()))
+        dispatcher.dispatchOnUi(SendMessageAction(messageEditText.text.toString(), outputFileUri))
         messageEditText.text.clear()
         chatStore.flowable()
                 .filterOne { it.sendMessageTask.isTerminal() } //Wait for request to finish
@@ -88,6 +98,40 @@ class HomeActivity : FluxActivity() {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         }
         startActivity(intent)
+    }
+
+    private fun requestPermissionsAndPickImage() {
+        rxPermissionInstance.request(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                .subscribe {
+                    if (it) {
+                        outputFileUri = AndroidUtils.generateUniqueFireUri(this)
+                        AndroidUtils.showImageIntentDialog(this, outputFileUri!!)
+                    }
+                }
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        if (resultCode != Activity.RESULT_CANCELED) {
+            when (requestCode) {
+                TC_REQUEST_GALLERY, TC_REQUEST_CAMERA ->
+                    if (resultCode == Activity.RESULT_OK) {
+                        val uri = if (requestCode == TC_REQUEST_GALLERY) data?.data else outputFileUri
+                        if (uri == null) {
+                            Crashlytics.log("Uri was null when updating profile picture and using code $resultCode")
+                            toast(getString(R.string.error_picture_null))
+                            return
+                        }
+                        onImageReady()
+                    }
+            }
+        }
+    }
+
+    private fun onImageReady() {
+        toast("your image have been attached")
+        //TODO move to selector
+        photoPickerButton.setColorFilter(ContextCompat.getColor(this, R.color.image_picked_color),
+                android.graphics.PorterDuff.Mode.MULTIPLY)
     }
 
     override fun onStart() {

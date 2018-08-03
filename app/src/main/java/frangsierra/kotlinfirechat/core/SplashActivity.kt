@@ -2,7 +2,6 @@ package frangsierra.kotlinfirechat.core
 
 import android.content.Intent
 import android.os.Bundle
-import com.crashlytics.android.Crashlytics
 import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.common.GoogleApiAvailability
 import frangsierra.kotlinfirechat.core.flux.FluxActivity
