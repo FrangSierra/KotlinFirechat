@@ -2,6 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="frangsierra.kotlinfirechat">
 
+    <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
 
@@ -37,10 +38,10 @@
             android:screenOrientation="portrait" />
 
         <provider
-            android:authorities="${applicationId}.provider"
+            android:name="android.support.v4.content.FileProvider"
+            android:authorities="frangsierra.kotlinfirechat.fileprovider"
             android:exported="false"
-            android:grantUriPermissions="true"
-            android:name="android.support.v4.content.FileProvider">
+            android:grantUriPermissions="true">
             <meta-data
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/provider_paths" />

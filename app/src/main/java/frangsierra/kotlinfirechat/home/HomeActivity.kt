@@ -101,7 +101,7 @@ class HomeActivity : FluxActivity() {
     }
 
     private fun requestPermissionsAndPickImage() {
-        rxPermissionInstance.request(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+        rxPermissionInstance.request(Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE)
                 .subscribe {
                     if (it) {
                         outputFileUri = AndroidUtils.generateUniqueFireUri(this)

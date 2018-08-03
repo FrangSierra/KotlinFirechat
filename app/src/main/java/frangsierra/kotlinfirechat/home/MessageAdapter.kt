@@ -30,7 +30,7 @@ class MessageAdapter : RecyclerView.Adapter<MessageAdapter.MessageViewHolder>() 
             if (attachedImageUrl == null) {
                 holder.messagePhoto.visibility = View.GONE
             } else {
-                holder.messagePhoto.setImage(attachedImageUrl)
+                holder.messagePhoto.setImage(attachedImageUrl) { holder.messagePhoto.visibility = View.GONE}
                 holder.messagePhoto.visibility = View.VISIBLE
             }
 
