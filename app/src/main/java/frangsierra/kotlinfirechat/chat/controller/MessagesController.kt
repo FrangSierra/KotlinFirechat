@@ -42,7 +42,7 @@ class ChatControllerImpl @Inject constructor(private val firestore: FirebaseFire
     override fun sendMessage(message: String, imageUri: Uri?, publicProfile: PublicProfile) {
         doAsync {
             val newId = firestore.messages().document().id
-            val firebaseMessage = FirebaseMessage(publicProfile.userData.toFirebaseUserData(), message, imageUri?.toString())
+            val firebaseMessage = FirebaseMessage(publicProfile.userData.toFirebaseUserData(), message)
 
             if (imageUri != null) {
                 val uploadJob = buildUploadJob(imageUri.toString(), publicProfile.userData.uid, newId, firebaseJobDispatcher.newJobBuilder())

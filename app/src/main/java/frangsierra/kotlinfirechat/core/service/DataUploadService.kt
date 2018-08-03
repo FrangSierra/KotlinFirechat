@@ -38,11 +38,12 @@ class DataUploadService : JobService() {
 
     private fun uploadFile(job: JobParameters, messageId: String, userId: String, fileUrl: Uri) {
         resizeUriToPostImage(fileUrl).flatMap { bytes -> putBytes(firebaseStorage.chatStorageMessageRef(userId, messageId), bytes) }
-                .flatMap { Single.create<Uri> { emmiter -> emmiter.onSuccess(Tasks.await(it.storage.downloadUrl)) } }
                 .subscribeOn(Schedulers.io())
+                .observeOn(Schedulers.io())
                 .subscribe(
-                        { uri ->
+                        { task ->
                             try {
+                                val uri = Tasks.await(task.storage.downloadUrl)
                                 Tasks.await(firebaseFirestore.messageDoc(messageId).update("attachedImageUrl", uri.toString()))
                                 jobFinished(job, false)
                             } catch (e: Exception) {
@@ -86,7 +87,8 @@ fun buildUploadJob(uri: String, userId: String, messageId: String, builder: Job.
 internal fun putBytes(storageRef: StorageReference, bytes: ByteArray): Single<UploadTask.TaskSnapshot> {
     return Single.create { emitter ->
         val taskSnapshotStorageTask = storageRef.putBytes(bytes)
-                .addOnSuccessListener { taskSnapshot -> emitter.onSuccess(taskSnapshot) }.addOnFailureListener { e ->
+                .addOnSuccessListener { taskSnapshot -> emitter.onSuccess(taskSnapshot) }
+                .addOnFailureListener { e ->
                     if (!emitter.isDisposed) {
                         emitter.onError(e)
                     }

@@ -23,7 +23,7 @@ android {
     buildToolsVersion "27.0.3"
     defaultConfig {
         applicationId "frangsierra.kotlinfirechat"
-        minSdkVersion 19
+        minSdkVersion 21
         targetSdkVersion target_sdk_version
         versionCode 1
         versionName "1.0"

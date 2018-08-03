@@ -92,10 +92,10 @@ object AndroidUtils {
 
     fun generateUniqueFireUri(context: Context): Uri {
         // Determine Uri of camera image to save.
-        val root = File(Environment.getExternalStorageDirectory().toString() + File.separator + "GrizzlyGrit" + File.separator)
+        val root = File(context.filesDir, "firechat")
         root.mkdirs()
         val fileName = "${System.currentTimeMillis()}$FORMAT_JPG"
-        val sdImageMainDirectory = File(root, fileName)
-        return FileProvider.getUriForFile(context, "${context.packageName}.provider", sdImageMainDirectory)
+        val newFile = File(root, fileName)
+        return FileProvider.getUriForFile(context, "frangsierra.kotlinfirechat.fileprovider", newFile)
     }
 }
