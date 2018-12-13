@@ -12,9 +12,9 @@ import frangsierra.kotlinfirechat.profile.model.PublicProfile
 import frangsierra.kotlinfirechat.profile.model.UserData
 import frangsierra.kotlinfirechat.profile.store.LoadUserDataCompleteAction
 import frangsierra.kotlinfirechat.session.model.User
-import frangsierra.kotlinfirechat.util.taskFailure
-import frangsierra.kotlinfirechat.util.taskSuccess
 import mini.Dispatcher
+import mini.taskFailure
+import mini.taskSuccess
 import javax.inject.Inject
 
 interface ProfileController {
@@ -29,9 +29,9 @@ class ProfileControllerImpl @Inject constructor(private val firestore: FirebaseF
                 val privateData = getAndCreateIfNoyExistsPrivateData(user)
                 val publicProfile = getAndCreateIfNotExistsPublicData(user)
                 updateUserLastLogin(userId = user.uid)
-                dispatcher.dispatchOnUi(LoadUserDataCompleteAction(privateData, publicProfile, taskSuccess()))
+                dispatcher.dispatch(LoadUserDataCompleteAction(privateData, publicProfile, taskSuccess()))
             } catch (e: Throwable) {
-                dispatcher.dispatchOnUi(LoadUserDataCompleteAction(null, null, taskFailure(e)))
+                dispatcher.dispatch(LoadUserDataCompleteAction(null, null, taskFailure(e)))
             }
         }
     }

@@ -10,6 +10,7 @@ import frangsierra.kotlinfirechat.core.errors.CrashlyticsHandler
 import frangsierra.kotlinfirechat.util.Prefs
 import io.fabric.sdk.android.Fabric
 import mini.MiniActionReducer
+import mini.log.LoggerInterceptor
 import org.jetbrains.annotations.TestOnly
 import kotlin.properties.Delegates
 
@@ -48,9 +49,8 @@ class App : Application() {
                     .builder()
                     .appModule(AppModule(this))
                     .build()
-            _appComponent!!.dispatcher().actionReducers.add(MiniActionReducer(stores = _appComponent!!.stores()))
-            _appComponent!!.dispatcher().addInterceptor(CustomLoggerInterceptor
-            (_appComponent!!.stores().values))
+            _appComponent!!.dispatcher().addActionReducer(MiniActionReducer(stores = _appComponent!!.stores()))
+            _appComponent!!.dispatcher().addInterceptor(LoggerInterceptor(_appComponent!!.stores().values))
         }
 
     }

@@ -9,9 +9,9 @@ import frangsierra.kotlinfirechat.session.store.CreateAccountCompleteAction
 import frangsierra.kotlinfirechat.session.store.LoginCompleteAction
 import frangsierra.kotlinfirechat.session.store.VerificationEmailSentAction
 import frangsierra.kotlinfirechat.session.store.VerifyUserEmailCompleteAction
-import frangsierra.kotlinfirechat.util.taskFailure
-import frangsierra.kotlinfirechat.util.taskSuccess
 import mini.Dispatcher
+import mini.taskFailure
+import mini.taskSuccess
 import javax.inject.Inject
 
 interface SessionController {
@@ -80,12 +80,12 @@ class SessionControllerImpl @Inject constructor(private val authInstance: Fireba
         authInstance.addAuthStateListener { firebaseAuth ->
             doAsync {
                 if (firebaseAuth.currentUser == null || !firebaseAuth.currentUser!!.isEmailVerified)
-                    dispatcher.dispatchOnUi(LoginCompleteAction(task = taskFailure()))
+                    dispatcher.dispatch(LoginCompleteAction(task = taskFailure()))
                 else {
                     val currentUser = firebaseAuth.currentUser!!
-                    dispatcher.dispatchOnUi(LoginCompleteAction(task = taskSuccess(),
-                            user = currentUser.toUser(),
-                            associatedProviders = currentUser.associatedProviders()))
+                    dispatcher.dispatch(LoginCompleteAction(task = taskSuccess(),
+                        user = currentUser.toUser(),
+                        associatedProviders = currentUser.associatedProviders()))
 
                 }
             }
@@ -99,13 +99,13 @@ class SessionControllerImpl @Inject constructor(private val authInstance: Fireba
                 val emailVerified = result.user.isEmailVerified
                 val user = result.user.toUser()
                 val providers = result.user.associatedProviders()
-                dispatcher.dispatchOnUi(LoginCompleteAction(
-                        user = user,
-                        emailVerified = emailVerified,
-                        task = taskSuccess(),
-                        associatedProviders = providers))
+                dispatcher.dispatch(LoginCompleteAction(
+                    user = user,
+                    emailVerified = emailVerified,
+                    task = taskSuccess(),
+                    associatedProviders = providers))
             } catch (e: Throwable) {
-                dispatcher.dispatchOnUi(LoginCompleteAction(user = null, task = taskFailure(e)))
+                dispatcher.dispatch(LoginCompleteAction(user = null, task = taskFailure(e)))
             }
         }
     }
@@ -118,14 +118,14 @@ class SessionControllerImpl @Inject constructor(private val authInstance: Fireba
                 val emailVerified = firebaseUser.isEmailVerified
                 val user = firebaseUser.toUser().copy(username = username)
                 val providers = firebaseUser.associatedProviders()
-                dispatcher.dispatchOnUi(CreateAccountCompleteAction(
-                        user = user,
-                        emailVerified = emailVerified,
-                        task = taskSuccess(),
-                        associatedProviders = providers))
+                dispatcher.dispatch(CreateAccountCompleteAction(
+                    user = user,
+                    emailVerified = emailVerified,
+                    task = taskSuccess(),
+                    associatedProviders = providers))
                 if (!emailVerified) sendVerificationEmailToUser(firebaseUser)
             } catch (e: Throwable) {
-                dispatcher.dispatchOnUi(LoginCompleteAction(user = null, task = taskFailure(e)))
+                dispatcher.dispatch(LoginCompleteAction(user = null, task = taskFailure(e)))
             }
         }
     }
@@ -140,17 +140,17 @@ class SessionControllerImpl @Inject constructor(private val authInstance: Fireba
                     val emailVerified = authResult.user.isEmailVerified
                     val user = authResult.user.toUser()
                     val providers = authResult.user.associatedProviders()
-                    dispatcher.dispatchOnUi(LoginCompleteAction(
-                            user = user,
-                            emailVerified = emailVerified,
-                            task = taskSuccess(),
-                            associatedProviders = providers))
+                    dispatcher.dispatch(LoginCompleteAction(
+                        user = user,
+                        emailVerified = emailVerified,
+                        task = taskSuccess(),
+                        associatedProviders = providers))
                     if (!emailVerified) sendVerificationEmailToUser(authResult.user)
                 } else {
-                    dispatcher.dispatchOnUi(LoginCompleteAction(user = null, task = taskFailure(ProviderNotLinkedException(credential.provider))))
+                    dispatcher.dispatch(LoginCompleteAction(user = null, task = taskFailure(ProviderNotLinkedException(credential.provider))))
                 }
             } catch (e: Throwable) {
-                dispatcher.dispatchOnUi(LoginCompleteAction(user = null, task = taskFailure(e)))
+                dispatcher.dispatch(LoginCompleteAction(user = null, task = taskFailure(e)))
             }
         }
     }
@@ -165,25 +165,25 @@ class SessionControllerImpl @Inject constructor(private val authInstance: Fireba
                     val emailVerified = authResult.user.isEmailVerified
                     val user = authResult.user.toUser().copy(photoUrl = userData.photoUrl)
                     val providers = authResult.user.associatedProviders()
-                    dispatcher.dispatchOnUi(CreateAccountCompleteAction(
-                            user = user,
-                            alreadyExisted = !isNewAccount,
-                            emailVerified = emailVerified,
-                            task = taskSuccess(),
-                            associatedProviders = providers))
+                    dispatcher.dispatch(CreateAccountCompleteAction(
+                        user = user,
+                        alreadyExisted = !isNewAccount,
+                        emailVerified = emailVerified,
+                        task = taskSuccess(),
+                        associatedProviders = providers))
                     if (!emailVerified) sendVerificationEmailToUser(authResult.user)
                 } else {
-                    dispatcher.dispatchOnUi(CreateAccountCompleteAction(user = null, task = taskFailure(ProviderNotLinkedException(credential.provider))))
+                    dispatcher.dispatch(CreateAccountCompleteAction(user = null, task = taskFailure(ProviderNotLinkedException(credential.provider))))
                 }
             } catch (e: Throwable) {
-                dispatcher.dispatchOnUi(CreateAccountCompleteAction(user = null, task = taskFailure(e)))
+                dispatcher.dispatch(CreateAccountCompleteAction(user = null, task = taskFailure(e)))
             }
         }
     }
 
     override fun sendVerificationEmail() {
         if (authInstance.currentUser == null) {
-            dispatcher.dispatchOnUi(VerificationEmailSentAction(taskFailure(FirebaseUserNotFound())))
+            dispatcher.dispatch(VerificationEmailSentAction(taskFailure(FirebaseUserNotFound())))
             return
         }
         sendVerificationEmailToUser(authInstance.currentUser!!)
@@ -195,19 +195,19 @@ class SessionControllerImpl @Inject constructor(private val authInstance: Fireba
 
     override fun verifyUser() {
         if (authInstance.currentUser == null) {
-            dispatcher.dispatchOnUi(VerifyUserEmailCompleteAction(taskFailure(FirebaseUserNotFound()),
-                    verified = false))
+            dispatcher.dispatch(VerifyUserEmailCompleteAction(taskFailure(FirebaseUserNotFound()),
+                verified = false))
             return
         }
 
         authInstance.currentUser!!.reload() //send a verification email needs to have a recent user instance. We need to reload it to avoid errors
-                .addOnCompleteListener { reloadTask ->
-                    //After the reload the currentUser can be null because it takes some time in be updated
-                    if (reloadTask.isSuccessful && authInstance.currentUser != null) {
-                        val user = authInstance.currentUser!!
-                        dispatcher.dispatchOnUi(VerifyUserEmailCompleteAction(task = taskSuccess(), verified = user.isEmailVerified))
-                    } else dispatcher.dispatchOnUi(VerifyUserEmailCompleteAction(task = taskFailure(reloadTask.exception)))
-                }
+            .addOnCompleteListener { reloadTask ->
+                //After the reload the currentUser can be null because it takes some time in be updated
+                if (reloadTask.isSuccessful && authInstance.currentUser != null) {
+                    val user = authInstance.currentUser!!
+                    dispatcher.dispatch(VerifyUserEmailCompleteAction(task = taskSuccess(), verified = user.isEmailVerified))
+                } else dispatcher.dispatch(VerifyUserEmailCompleteAction(task = taskFailure(reloadTask.exception)))
+            }
     }
 
     private fun sendVerificationEmailToUser(user: FirebaseUser) {
@@ -215,9 +215,9 @@ class SessionControllerImpl @Inject constructor(private val authInstance: Fireba
             try {
                 Tasks.await(user.reload())
                 Tasks.await(user.sendEmailVerification())
-                dispatcher.dispatchOnUi(VerificationEmailSentAction(taskSuccess()))
+                dispatcher.dispatch(VerificationEmailSentAction(taskSuccess()))
             } catch (e: Throwable) {
-                dispatcher.dispatchOnUi(VerificationEmailSentAction(task = taskFailure(e)))
+                dispatcher.dispatch(VerificationEmailSentAction(task = taskFailure(e)))
             }
         }
     }

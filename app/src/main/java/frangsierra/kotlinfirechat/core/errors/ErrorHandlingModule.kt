@@ -15,7 +15,7 @@ import frangsierra.kotlinfirechat.R
 import frangsierra.kotlinfirechat.core.dagger.AppScope
 import frangsierra.kotlinfirechat.session.model.FirebaseUserNotFound
 import mini.Dispatcher
-import mini.Grove
+import mini.log.Grove
 import java.net.UnknownHostException
 import java.util.concurrent.TimeoutException
 import javax.inject.Inject
@@ -98,23 +98,23 @@ class DefaultErrorHandler @Inject constructor(private val context: Context,
 
     private fun retrieveFirebaseErrorMessage(error: FirebaseFirestoreException): String {
         when (error.code) {
-        //OK -> TODO()
-        //CANCELLED -> TODO()
-        //UNKNOWN -> TODO()
-        //INVALID_ARGUMENT -> TODO()
-        //DEADLINE_EXCEEDED -> TODO()
-        //NOT_FOUND -> TODO()
-        //ALREADY_EXISTS -> TODO()
-        //PERMISSION_DENIED -> TODO()
-        //RESOURCE_EXHAUSTED -> TODO()
-        //FAILED_PRECONDITION -> TODO()
-        //ABORTED -> TODO()
-        //OUT_OF_RANGE -> TODO()
-        //UNIMPLEMENTED -> TODO()
-        //INTERNAL -> TODO()
-        //UNAVAILABLE -> TODO()
-        //DATA_LOSS -> TODO()
-        //UNAUTHENTICATED -> TODO()
+            //OK -> TODO()
+            //CANCELLED -> TODO()
+            //UNKNOWN -> TODO()
+            //INVALID_ARGUMENT -> TODO()
+            //DEADLINE_EXCEEDED -> TODO()
+            //NOT_FOUND -> TODO()
+            //ALREADY_EXISTS -> TODO()
+            //PERMISSION_DENIED -> TODO()
+            //RESOURCE_EXHAUSTED -> TODO()
+            //FAILED_PRECONDITION -> TODO()
+            //ABORTED -> TODO()
+            //OUT_OF_RANGE -> TODO()
+            //UNIMPLEMENTED -> TODO()
+            //INTERNAL -> TODO()
+            //UNAVAILABLE -> TODO()
+            //DATA_LOSS -> TODO()
+            //UNAUTHENTICATED -> TODO()
         }
         return context.getString(R.string.error_unknown)
     }

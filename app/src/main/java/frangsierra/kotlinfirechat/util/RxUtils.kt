@@ -3,6 +3,7 @@ package frangsierra.kotlinfirechat.util
 import io.reactivex.*
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.disposables.Disposable
+import mini.TypedTask
 import java.util.concurrent.TimeUnit
 
 /** Apply the mapping function if object is not null. */

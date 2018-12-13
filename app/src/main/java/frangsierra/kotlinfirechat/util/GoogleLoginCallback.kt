@@ -7,9 +7,10 @@ import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
+import com.google.android.gms.common.api.Status
 import com.google.firebase.auth.AuthCredential
 import com.google.firebase.auth.GoogleAuthProvider
-import mini.Grove
+import mini.log.Grove
 
 const val RC_SIGN_IN = 1001
 
@@ -27,6 +28,10 @@ interface GoogleLoginCallback {
             val task = GoogleSignIn.getSignedInAccountFromIntent(data)
             try {
                 val account = task.getResult(ApiException::class.java)
+                if (account == null) {
+                    onGoogleSignInFailed(ApiException(Status.RESULT_CANCELED))
+                    return
+                }
                 val credential = GoogleAuthProvider.getCredential(account.idToken, null)
                 onGoogleCredentialReceived(credential, account)
             } catch (e: ApiException) {

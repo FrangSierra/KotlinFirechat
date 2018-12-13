@@ -20,6 +20,7 @@ import frangsierra.kotlinfirechat.profile.store.ProfileStore
 import frangsierra.kotlinfirechat.session.LoginActivity
 import frangsierra.kotlinfirechat.util.*
 import kotlinx.android.synthetic.main.home_activity.*
+import mini.TaskStatus
 import javax.inject.Inject
 
 class HomeActivity : FluxActivity() {
@@ -33,7 +34,7 @@ class HomeActivity : FluxActivity() {
 
     companion object {
         fun newIntent(context: Context): Intent =
-                Intent(context, HomeActivity::class.java)
+            Intent(context, HomeActivity::class.java)
     }
 
     private val messageAdapter = MessageAdapter()
@@ -57,20 +58,20 @@ class HomeActivity : FluxActivity() {
 
     private fun startListeningStoreChanges() {
         profileStore.flowable()
-                .view { it.loadProfileTask }
-                .subscribe {
-                    when (it.status) {
-                        TypedTask.Status.RUNNING -> showProgressDialog("Loading user profile")
-                        TypedTask.Status.SUCCESS -> dismissProgressDialog()
-                        TypedTask.Status.FAILURE -> goToLogin()
-                    }
-                }.track()
+            .view { it.loadProfileTask }
+            .subscribe {
+                when (it.status) {
+                    TaskStatus.RUNNING -> showProgressDialog("Loading user profile")
+                    TaskStatus.SUCCESS -> dismissProgressDialog()
+                    TaskStatus.ERROR -> goToLogin()
+                }
+            }.track()
 
         chatStore.flowable()
-                .view { it.messages }
-                .filter { it.isNotEmpty() }
-                .subscribe { messageAdapter.updateMessages(it.values.toList()) }
-                .track()
+            .view { it.messages }
+            .filter { it.isNotEmpty() }
+            .subscribe { messageAdapter.updateMessages(it.values.toList()) }
+            .track()
     }
 
     private fun sendMessage() {
@@ -79,17 +80,17 @@ class HomeActivity : FluxActivity() {
             return
         }
         sendButton.isEnabled = false
-        dispatcher.dispatchOnUi(SendMessageAction(messageEditText.text.toString(), outputFileUri))
+        dispatcher.dispatch(SendMessageAction(messageEditText.text.toString(), outputFileUri))
         messageEditText.text.clear()
         chatStore.flowable()
-                .filterOne { it.sendMessageTask.isTerminal() } //Wait for request to finish
-                .subscribe {
-                    if (it.sendMessageTask.isFailure()) {
-                        errorHandler.handle(it.sendMessageTask.error)
-                        toast("There was an error sending your message")
-                    }
-                    sendButton.isEnabled = true
-                }.track()
+            .filterOne { it.sendMessageTask.isTerminal() } //Wait for request to finish
+            .subscribe {
+                if (it.sendMessageTask.isFailure()) {
+                    errorHandler.handle(it.sendMessageTask.error)
+                    toast("There was an error sending your message")
+                }
+                sendButton.isEnabled = true
+            }.track()
     }
 
     private fun goToLogin() {
@@ -102,12 +103,12 @@ class HomeActivity : FluxActivity() {
 
     private fun requestPermissionsAndPickImage() {
         rxPermissionInstance.request(Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE)
-                .subscribe {
-                    if (it) {
-                        outputFileUri = AndroidUtils.generateUniqueFireUri(this)
-                        AndroidUtils.showImageIntentDialog(this, outputFileUri!!)
-                    }
+            .subscribe {
+                if (it) {
+                    outputFileUri = AndroidUtils.generateUniqueFireUri(this)
+                    AndroidUtils.showImageIntentDialog(this, outputFileUri!!)
                 }
+            }
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -131,7 +132,7 @@ class HomeActivity : FluxActivity() {
         toast("your image have been attached")
         //TODO move to selector
         photoPickerButton.setColorFilter(ContextCompat.getColor(this, R.color.image_picked_color),
-                android.graphics.PorterDuff.Mode.MULTIPLY)
+            android.graphics.PorterDuff.Mode.MULTIPLY)
     }
 
     override fun onStart() {

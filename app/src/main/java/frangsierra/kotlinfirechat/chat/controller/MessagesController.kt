@@ -14,12 +14,12 @@ import frangsierra.kotlinfirechat.core.firebase.FirebaseConstants.TOTAL_MESSAGES
 import frangsierra.kotlinfirechat.core.flux.doAsync
 import frangsierra.kotlinfirechat.core.service.buildUploadJob
 import frangsierra.kotlinfirechat.profile.model.PublicProfile
-import frangsierra.kotlinfirechat.util.taskFailure
-import frangsierra.kotlinfirechat.util.taskSuccess
 import io.reactivex.BackpressureStrategy
 import io.reactivex.Flowable
 import io.reactivex.schedulers.Schedulers
 import mini.Dispatcher
+import mini.taskFailure
+import mini.taskSuccess
 import javax.inject.Inject
 
 interface ChatController {
@@ -35,8 +35,8 @@ class ChatControllerImpl @Inject constructor(private val firestore: FirebaseFire
         val disposable = listenMessagesFlowable()
                 .map { it.documents.map { it.toMessage() } }
                 .subscribeOn(Schedulers.io())
-                .subscribe { dispatcher.dispatchOnUi(MessagesLoadedAction(it)) }
-        dispatcher.dispatchOnUi(ListeningChatMessagesCompleteAction(disposable))
+                .subscribe { dispatcher.dispatch(MessagesLoadedAction(it)) }
+        dispatcher.dispatch(ListeningChatMessagesCompleteAction(disposable))
     }
 
     override fun sendMessage(message: String, imageUri: Uri?, publicProfile: PublicProfile) {
@@ -56,9 +56,9 @@ class ChatControllerImpl @Inject constructor(private val firestore: FirebaseFire
                         mapOf(TOTAL_MESSAGES to publicProfile.totalMessages.plus(1)))
                 Tasks.await(batch.commit())
 
-                dispatcher.dispatchOnUi(SendMessageCompleteAction(firebaseMessage.toMessage(newId), taskSuccess()))
+                dispatcher.dispatch(SendMessageCompleteAction(firebaseMessage.toMessage(newId), taskSuccess()))
             } catch (e: Throwable) {
-                dispatcher.dispatchOnUi(SendMessageCompleteAction(null, taskFailure(e)))
+                dispatcher.dispatch(SendMessageCompleteAction(null, taskFailure(e)))
             }
         }
     }

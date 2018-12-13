@@ -3,7 +3,7 @@ package frangsierra.kotlinfirechat.session.store
 import com.google.firebase.auth.AuthCredential
 import frangsierra.kotlinfirechat.session.model.LoginProvider
 import frangsierra.kotlinfirechat.session.model.User
-import frangsierra.kotlinfirechat.util.Task
+import mini.Task
 import mini.Action
 
 /**

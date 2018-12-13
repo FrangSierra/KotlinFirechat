@@ -2,7 +2,7 @@ package frangsierra.kotlinfirechat.chat.store
 
 import android.net.Uri
 import frangsierra.kotlinfirechat.chat.model.Message
-import frangsierra.kotlinfirechat.util.Task
+import mini.Task
 import io.reactivex.disposables.Disposable
 import mini.Action
 

@@ -8,9 +8,9 @@ import frangsierra.kotlinfirechat.core.dagger.AppScope
 import frangsierra.kotlinfirechat.core.flux.prefs
 import frangsierra.kotlinfirechat.session.controller.SessionController
 import frangsierra.kotlinfirechat.session.controller.SessionControllerImpl
-import frangsierra.kotlinfirechat.util.taskRunning
 import mini.Reducer
 import mini.Store
+import mini.taskRunning
 import javax.inject.Inject
 
 @AppScope

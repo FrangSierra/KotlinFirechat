@@ -57,7 +57,7 @@ class EmailVerificationActivity : FluxActivity() {
     private fun verifyUserEmail() {
         confirm_email_next_button.isEnabled = false
         showProgressDialog("Verifying")
-        dispatcher.dispatchOnUi(VerifyUserEmailAction())
+        dispatcher.dispatch(VerifyUserEmailAction())
         sessionStore.flowable()
             .filterOne { it.verifyUserTask.isTerminal() } //Wait for request to finish
             .subscribe {
@@ -97,7 +97,7 @@ class EmailVerificationActivity : FluxActivity() {
     }
 
     override fun onBackPressed() {
-        dispatcher.dispatchOnUi(SignOutAction())
+        dispatcher.dispatch(SignOutAction())
     }
 
     override fun finish() {

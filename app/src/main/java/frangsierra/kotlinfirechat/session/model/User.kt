@@ -6,7 +6,7 @@ import java.util.*
 
 data class User(val uid: String,
                 val username: String,
-                val photoUrl: String?,
+                val photoUrl: String? = null,
                 val email: String)
 
 fun FirebaseUser.toUser(): User = User(

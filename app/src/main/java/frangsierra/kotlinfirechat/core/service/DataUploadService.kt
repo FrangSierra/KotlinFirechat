@@ -13,7 +13,7 @@ import frangsierra.kotlinfirechat.core.firebase.messageDoc
 import frangsierra.kotlinfirechat.util.ImageUtils.resizeUriToPostImage
 import io.reactivex.Single
 import io.reactivex.schedulers.Schedulers
-import mini.Grove
+import mini.log.Grove
 
 private const val MESSAGE_ID_SERVICE_KEY = "message_service_id"
 private const val USER_ID_SERVICE_KEY = "user_service_id"

@@ -9,10 +9,10 @@ import frangsierra.kotlinfirechat.chat.controller.ChatControllerImpl
 import frangsierra.kotlinfirechat.core.dagger.AppScope
 import frangsierra.kotlinfirechat.profile.store.ProfileStore
 import frangsierra.kotlinfirechat.session.store.SignOutAction
-import frangsierra.kotlinfirechat.util.taskRunning
 import io.reactivex.disposables.CompositeDisposable
 import mini.Reducer
 import mini.Store
+import mini.taskRunning
 import javax.inject.Inject
 
 @AppScope

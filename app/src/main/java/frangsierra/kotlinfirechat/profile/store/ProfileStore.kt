@@ -10,9 +10,9 @@ import frangsierra.kotlinfirechat.profile.controller.ProfileController
 import frangsierra.kotlinfirechat.profile.controller.ProfileControllerImpl
 import frangsierra.kotlinfirechat.session.store.CreateAccountCompleteAction
 import frangsierra.kotlinfirechat.session.store.LoginCompleteAction
-import frangsierra.kotlinfirechat.util.taskRunning
 import mini.Reducer
 import mini.Store
+import mini.taskRunning
 import javax.inject.Inject
 
 @AppScope
